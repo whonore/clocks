@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "arduino.h"
 
 void setup();
@@ -27,17 +28,15 @@ static int last_hour_st = LOW;
 static int last_minute_st = LOW;
 static unsigned int off[] = {0, 0}; // Hour, minute
 
-#define TIME_FACTOR (2)
-#define DELAY_US ((unsigned int) (1000 / TIME_FACTOR))
-
-int main() {
+int main(int argc, char **argv) {
+    double factor = 1 < argc ? atof(argv[1]) : 1.0;
     unsigned long cnt = 0;
     setup();
     while (1) {
         loop();
         display(cnt, hours, NHOURS, mins, NMINS, secs, NSECS);
         cnt += 1;
-        usleep(DELAY_US);
+        usleep((unsigned int) (1000 / factor));
     }
     return 0;
 }
