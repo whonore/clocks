@@ -1,5 +1,8 @@
 #include <assert.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #define LOW 0
@@ -11,6 +14,34 @@
 #define NPINS 20
 struct pin_t { int mode; int val; };
 static struct pin_t pins[NPINS];
+
+#define SERIAL_OUT 256
+struct Serial_t {
+    bool Serial;
+    void (*print)(const char *str);
+    void (*begin)(int baud);
+    char out[SERIAL_OUT];
+} Serial;
+
+void serial_print(const char *str) {
+    int len = strnlen(Serial.out, SERIAL_OUT);
+    if (len == SERIAL_OUT - 1) {
+        memset(Serial.out, '\0', SERIAL_OUT);
+        len = 0;
+    }
+    strncat(Serial.out, str, SERIAL_OUT - len - 1);
+}
+
+void serial_begin(int baud) {
+    Serial.Serial = true;
+}
+
+void arduino_init() {
+    Serial.Serial = false;
+    Serial.print = serial_print;
+    Serial.begin = serial_begin;
+    memset(Serial.out, '\0', SERIAL_OUT);
+}
 
 void clear() {
     printf("\x1b[2J");
@@ -28,6 +59,10 @@ void display(int cnt,
     struct pin_t pin;
 
     clear();
+    if (Serial.out != NULL) {
+        printf("%s\n", Serial.out);
+    }
+
     printf("Iteration:  %d\nTime (sec): %d\n\n", cnt, (unsigned int) (cnt / 1000));
 
     printf("Secs:  ");

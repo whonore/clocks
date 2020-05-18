@@ -7,8 +7,16 @@ void loop();
 static void setTime(unsigned int *time, unsigned long ms);
 static void dispTime(const int *leds, unsigned int val, unsigned int nleds);
 
+#define DEBUG 1
+#if DEBUG
+static char debug[256];
+#define DPRINTF(...) sprintf(debug, __VA_ARGS__); Serial.print(debug)
+#else
+#define DPRINTF() do {} while(0)
+#endif
+
 #define ULONG_MAX ((unsigned long) (-1))
-#define TIME_MS_MAX ((unsigned long) (1000U * 60U * 60U * 24U))
+#define TIME_MS_MAX ((unsigned long) 1000 * 60 * 60 * 24)
 
 // LEDs
 const static int hours[] = {1, 2, 3, 4, 5};
@@ -31,6 +39,7 @@ static unsigned int off[] = {0, 0}; // Hour, minute
 int main(int argc, char **argv) {
     double factor = 1 < argc ? atof(argv[1]) : 1.0;
     unsigned long cnt = 0;
+    arduino_init();
     setup();
     while (1) {
         loop();
@@ -42,6 +51,10 @@ int main(int argc, char **argv) {
 }
 
 void setup() {
+#if DEBUG
+    Serial.begin(9600);
+    while (!Serial.Serial) {}
+#endif
     for (unsigned int i = 0; i < NHOURS; i++) {
         pinMode(hours[i], OUTPUT);
     }
@@ -70,14 +83,17 @@ void loop() {
         dispTime(hours, time[0], NHOURS);
         dispTime(mins, time[1], NMINS);
         dispTime(secs, time[2], NSECS);
+        DPRINTF("H:%u\tM:%u\tS:%u\n", time[0], time[1], time[2]);
     }
 
     if (hour_st == HIGH && last_hour_st != HIGH) {
+        DPRINTF("Hour+\n");
         off[0] = (off[0] + 1) % 24;
         delay(50);
     }
 
     if (minute_st == HIGH && last_minute_st != HIGH) {
+        DPRINTF("Minute+\n");
         off[1] = (off[1] + 1) % 60;
         delay(50);
     }
