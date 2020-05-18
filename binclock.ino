@@ -1,3 +1,11 @@
+#define DEBUG 1
+#if DEBUG
+static char debug[256];
+#define DPRINTF(...) sprintf(debug, __VA_ARGS__); Serial.print(debug)
+#else
+#define DPRINTF() do {} while(0)
+#endif
+
 #define ULONG_MAX ((unsigned long) (-1))
 #define TIME_MS_MAX ((unsigned long) 1000 * 60 * 60 * 24)
 
@@ -20,6 +28,10 @@ static int last_minute_st = LOW;
 static unsigned int off[] = {0, 0}; // Hour, minute
 
 void setup() {
+#if DEBUG
+    Serial.begin(9600);
+    while (!Serial) {}
+#endif
     for (unsigned int i = 0; i < NHOURS; i++) {
         pinMode(hours[i], OUTPUT);
     }
@@ -48,14 +60,17 @@ void loop() {
         dispTime(hours, time[0], NHOURS);
         dispTime(mins, time[1], NMINS);
         dispTime(secs, time[2], NSECS);
+        DPRINTF("H:%u\tM:%u\tS:%u\n", time[0], time[1], time[2]);
     }
 
     if (hour_st == HIGH && last_hour_st != HIGH) {
+        DPRINTF("Hour+\n");
         off[0] = (off[0] + 1) % 24;
         delay(50);
     }
 
     if (minute_st == HIGH && last_minute_st != HIGH) {
+        DPRINTF("Minute+\n");
         off[1] = (off[1] + 1) % 60;
         delay(50);
     }
