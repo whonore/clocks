@@ -1,5 +1,5 @@
 #define ULONG_MAX ((unsigned long) (-1))
-#define TIME_MS_MAX ((unsigned long) (1000U * 60U * 60U * 24U))
+#define TIME_MS_MAX ((unsigned long) 1000 * 60 * 60 * 24)
 
 // LEDs
 const static int hours[] = {1, 2, 3, 4, 5};
