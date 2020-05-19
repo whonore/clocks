@@ -1,9 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "arduino.h"
 
-void setup();
-void loop();
 static void setTime(unsigned int *time, unsigned long ms);
 static void dispTime(const int *leds, unsigned int val, unsigned int nleds);
 
@@ -35,20 +31,6 @@ static unsigned long last_time = 0;
 static int last_hour_st = LOW;
 static int last_minute_st = LOW;
 static unsigned int off[] = {0, 0}; // Hour, minute
-
-int main(int argc, char **argv) {
-    double factor = 1 < argc ? atof(argv[1]) : 1.0;
-    unsigned long cnt = 0;
-    arduino_init();
-    setup();
-    while (1) {
-        loop();
-        display(cnt, hours, NHOURS, mins, NMINS, secs, NSECS);
-        cnt += 1;
-        usleep((unsigned int) (1000 / factor));
-    }
-    return 0;
-}
 
 void setup() {
 #if DEBUG

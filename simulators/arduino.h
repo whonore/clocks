@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -15,6 +16,7 @@
 struct pin_t { int mode; int val; };
 static struct pin_t pins[NPINS];
 
+// Serial
 #define SERIAL_OUT 256
 struct Serial_t {
     bool Serial;
@@ -36,64 +38,7 @@ void serial_begin(int baud) {
     Serial.Serial = true;
 }
 
-void arduino_init() {
-    Serial.Serial = false;
-    Serial.print = serial_print;
-    Serial.begin = serial_begin;
-    memset(Serial.out, '\0', SERIAL_OUT);
-}
-
-void clear() {
-    printf("\x1b[2J");
-}
-
-void print_pin(struct pin_t *pin) {
-    printf(" %s ", pin->val == HIGH ? "o" : "-");
-}
-
-void display(int cnt,
-             const int *hours, int nhours,
-             const int *mins, int nmins,
-             const int *secs, int nsecs) {
-    int i = 0;
-    struct pin_t pin;
-
-    clear();
-    if (Serial.out != NULL) {
-        printf("%s\n", Serial.out);
-    }
-
-    printf("Iteration:  %d\nTime (sec): %d\n\n", cnt, (unsigned int) (cnt / 1000));
-
-    printf("Secs:  ");
-    for (i = 0; i < nsecs; i++) {
-        pin = pins[secs[i]];
-        assert(pin.mode == OUTPUT);
-        print_pin(&pin);
-    }
-    printf("\n");
-
-    printf("Mins:  ");
-    for (i = 0; i < nmins; i++) {
-        pin = pins[mins[i]];
-        assert(pin.mode == OUTPUT);
-        print_pin(&pin);
-    }
-    printf("\n");
-
-    printf("Hours: ");
-    for (i = 0; i < nhours; i++) {
-        pin = pins[hours[i]];
-        assert(pin.mode == OUTPUT);
-        print_pin(&pin);
-    }
-    printf("\n");
-}
-
-void pinMode(int pin, int mode) {
-    pins[pin].mode = mode;
-}
-
+// Library
 unsigned long millis() {
     static unsigned long time = 0;
     time += 1;
@@ -102,6 +47,10 @@ unsigned long millis() {
 
 void delay(int ms) {
     sleep((int) ceil(ms / 1000.0));
+}
+
+void pinMode(int pin, int mode) {
+    pins[pin].mode = mode;
 }
 
 int digitalRead(int pin) {
@@ -116,4 +65,61 @@ void digitalWrite(int pin, int val) {
 
 int bitRead(int val, int bit) {
     return (val >> bit) & 1;
+}
+
+// Initialization
+void setup();
+void loop();
+
+static void arduino_init() {
+    Serial.Serial = false;
+    Serial.print = serial_print;
+    Serial.begin = serial_begin;
+    memset(Serial.out, '\0', SERIAL_OUT);
+}
+
+static void clear() {
+    printf("\x1b[2J");
+}
+
+static void print_pin(struct pin_t *pin) {
+    if (pin->mode == OUTPUT) {
+        printf(" %s ", pin->val == HIGH ? "+" : "-");
+    } else {
+        printf("   ");
+    }
+}
+
+static void display() {
+    static unsigned long iter = 0;
+    int i = 0;
+
+    clear();
+    if (Serial.out != NULL) {
+        printf("%s\n\n", Serial.out);
+    }
+    printf("Iteration:  %lu\nTime (sec): %lu\n\n", iter, iter / 1000);
+
+    for (i = 0; i < NPINS; i++) {
+        printf("%2d ", i);
+    }
+    printf("\n");
+    for (i = 0; i < NPINS; i++) {
+        print_pin(&pins[i]);
+    }
+    printf("\n");
+
+    iter += 1;
+}
+
+int main(int argc, char **argv) {
+    double factor = 1 < argc ? atof(argv[1]) : 1.0;
+    arduino_init();
+    setup();
+    while (1) {
+        loop();
+        display();
+        usleep((unsigned int) (1000 / factor));
+    }
+    return 0;
 }
