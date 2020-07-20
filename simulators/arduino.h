@@ -12,6 +12,12 @@
 #define INPUT 0
 #define OUTPUT 1
 
+#define A0 14
+#define A1 15
+#define A2 16
+#define A3 17
+#define A4 18
+#define A5 19
 #define NPINS 20
 struct pin_t { int mode; int val; };
 static struct pin_t pins[NPINS];

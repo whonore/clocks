@@ -80,7 +80,7 @@ void loop() {
     }
 }
 
-static bool pressed(unsigned int button, unsigned int *old, unsigned int active) {
+static bool pressed(unsigned int button, int *old, int active) {
     int st = digitalRead(button);
     int st_old = *old;
     *old = st;
