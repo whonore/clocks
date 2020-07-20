@@ -1,7 +1,15 @@
+CCOPTS := -Wall
+CCLINK := -lm
+ifneq ($(DEBUG),)
+CCOPTS += -DDEBUG=$(DEBUG)
+endif
+
+.PHONY: all lintpy
+
 all: binclock
 
 binclock: binclock.c arduino.h
-	gcc -Wall binclock.c -o binclock -lm
+	gcc $(CCOPTS) $< -o $@ $(CCLINK)
 
 binclock.c: ../binclock.ino
 	python ino2c.py ../binclock.ino binclock.c

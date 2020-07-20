@@ -1,9 +1,13 @@
+#ifndef DEBUG
 #define DEBUG 0
+#endif
+
 #if DEBUG
-static char debug[256];
-#define DPRINTF(...) sprintf(debug, __VA_ARGS__); Serial.print(debug)
+#define DEBUG_SZ 256
+static char debug[DEBUG_SZ];
+#define DPRINTF(...) snprintf(debug, DEBUG_SZ, __VA_ARGS__); Serial.print(debug)
 #else
-#define DPRINTF(...) do {} while(0)
+#define DPRINTF(...) do {} while (0)
 #endif
 
 #define ULONG_MAX ((unsigned long) (-1))

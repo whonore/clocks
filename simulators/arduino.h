@@ -1,3 +1,6 @@
+#ifndef ARDUINO_H
+#define ARDUINO_H 1
+
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
@@ -60,12 +63,12 @@ void pinMode(int pin, int mode) {
 }
 
 int digitalRead(int pin) {
-    assert (pins[pin].mode == INPUT);
+    assert(pins[pin].mode == INPUT);
     return LOW;
 }
 
 void digitalWrite(int pin, int val) {
-    assert (pins[pin].mode == OUTPUT);
+    assert(pins[pin].mode == OUTPUT);
     pins[pin].val = val;
 }
 
@@ -129,3 +132,5 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
+
+#endif // ARDUINO_H
