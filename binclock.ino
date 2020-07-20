@@ -10,21 +10,21 @@ static char debug[256];
 #define TIME_MS_MAX ((unsigned long) 1000 * 60 * 60 * 24)
 
 // LEDs
-const static int hours[] = {1, 2, 3, 4, 5};
+const static int hours[] = {8, 9, 10, 11, 12};
 #define NHOURS (sizeof(hours) / sizeof(hours[0]))
-const static int mins[] = {6, 7, 8, 9, 10, 11};
+const static int mins[] = {2, 3, 4, 5, 6, 7};
 #define NMINS (sizeof(mins) / sizeof(mins[0]))
-const static int secs[] = {12, 13, 14, 15, 16, 17};
+const static int secs[] = {A0, A1, A2, A3, A4, A5};
 #define NSECS (sizeof(secs) / sizeof(secs[0]))
 
 // Buttons
-const static int incHour = 18;
-const static int incMinute = 19;
+const static int incHour = 0;
+const static int incMin = 13;
 
 static unsigned long last_ms = 0;
 static unsigned long last_time = 0;
-static int last_hour_st = LOW;
-static int last_minute_st = LOW;
+static int last_hour_st = HIGH;
+static int last_min_st = LOW;
 static unsigned int off[] = {0, 0}; // Hour, minute
 
 void setup() {
@@ -42,7 +42,7 @@ void setup() {
         pinMode(secs[i], OUTPUT);
     }
     pinMode(incHour, INPUT);
-    pinMode(incMinute, INPUT);
+    pinMode(incMin, INPUT);
 }
 
 void loop() {
@@ -50,42 +50,50 @@ void loop() {
     unsigned long ellapsed =
         last_ms < time_ms ? time_ms - last_ms : time_ms + (ULONG_MAX - last_ms);
     unsigned int time[] = {off[0], off[1], 0};
-    int hour_st = digitalRead(incHour);
-    int minute_st = digitalRead(incMinute);
+    bool hour_pressed = pressed(incHour, &last_hour_st, LOW);
+    bool min_pressed = pressed(incMin, &last_min_st, HIGH);
+    bool at_second = (1000 <= ellapsed);
 
-    if (1000 <= ellapsed) {
+    if (hour_pressed) {
+        DPRINTF("Hour+\n");
+        time[0] = off[0] = off[0] + 1;
+        delay(100);
+    }
+
+    if (min_pressed) {
+        DPRINTF("Minute+\n");
+        time[1] = off[1] = off[1] + 1;
+        delay(50);
+    }
+
+    if (at_second) {
         last_time = (last_time + ellapsed) % TIME_MS_MAX;
         last_ms = time_ms;
+    }
+
+    if (at_second || hour_pressed || min_pressed) {
         setTime(time, last_time);
         dispTime(hours, time[0], NHOURS);
         dispTime(mins, time[1], NMINS);
         dispTime(secs, time[2], NSECS);
         DPRINTF("H:%u\tM:%u\tS:%u\n", time[0], time[1], time[2]);
     }
+}
 
-    if (hour_st == HIGH && last_hour_st != HIGH) {
-        DPRINTF("Hour+\n");
-        off[0] = (off[0] + 1) % 24;
-        delay(50);
-    }
-
-    if (minute_st == HIGH && last_minute_st != HIGH) {
-        DPRINTF("Minute+\n");
-        off[1] = (off[1] + 1) % 60;
-        delay(50);
-    }
-
-    last_hour_st = hour_st;
-    last_minute_st = minute_st;
+static bool pressed(unsigned int button, unsigned int *old, unsigned int active) {
+    int st = digitalRead(button);
+    int st_old = *old;
+    *old = st;
+    return (st == active && st_old != active);
 }
 
 static void setTime(unsigned int *time, unsigned long ms) {
-    unsigned long sec = ms / 1000;
-    unsigned long min = sec / 60;
-    unsigned long hr = min / 60;
-    time[0] = (time[0] + hr) % 24;
-    time[1] = (time[1] + min) % 60;
-    time[2] = (time[2] + sec) % 60;
+    unsigned long sec = time[2] + (ms / 1000);
+    unsigned long min = time[1] + (sec / 60);
+    unsigned long hr = time[0] + (min / 60);
+    time[0] = hr % 24;
+    time[1] = min % 60;
+    time[2] = sec % 60;
 }
 
 static void dispTime(const int *leds, unsigned int val, unsigned int nleds) {
