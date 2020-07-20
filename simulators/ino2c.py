@@ -1,6 +1,5 @@
 import os
 import re
-import shutil
 import sys
 from typing import List
 
@@ -23,7 +22,7 @@ def add_header(ino: str, c: str, funcs: List[str]) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        sys.exit(f"Usage: ino2c input.ino [output.c]")
+        sys.exit("Usage: ino2c input.ino [output.c]")
     ino = sys.argv[1]
     c = (
         sys.argv[2]
