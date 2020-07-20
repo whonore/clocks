@@ -1,50 +1,63 @@
 import math
 import time
 import turtle
+from typing import Mapping, Optional, Sequence, Tuple, Union
 
-def bits(n, max=None):
+Color = Union[str, Tuple[float, float, float]]
+
+
+def bits(n: int, max: Optional[int] = None) -> Sequence[int]:
     len = math.ceil(math.log2(max)) if max is not None else 0
     return list(map(int, bin(n)[2:].zfill(len)))
 
-def interpolate(min, max, n):
+
+def interpolate(min: int, max: int, n: int) -> Sequence[int]:
     step = math.ceil((max - min) / (n - 1))
     return list(range(min, max, step)) + [max]
 
+
 class BinClock(turtle.Turtle):
     refresh_ms = 500
-    rings = ('hour', 'min', 'sec')
+    rings = ("hour", "min", "sec")
 
-    def __init__(self, dotsz=10, inner_radius=20, outer_radius=100, colors=None):
+    def __init__(
+        self,
+        dotsz: int = 10,
+        inner_radius: int = 39,
+        outer_radius: int = 61,
+        colors: Optional[Mapping[str, Color]] = None,
+    ) -> None:
         self.dotsz = dotsz
-        self.colors = {
-            'hour': 'red',
-            'min': 'blue',
-            'sec': 'green'
+        self.colors: Mapping[str, Color] = {
+            "hour": "yellow",
+            "min": "green",
+            "sec": "blue",
         }
         if colors is not None:
             self.colors.update(colors)
         self.radii = interpolate(inner_radius, outer_radius, len(self.rings))
         super().__init__()
 
-    def start(self):
-        self.screen.mode('logo')
-        self.screen.tracer(0, 0)
+    def start(self) -> None:
+        self.screen.mode("logo")  # type: ignore
+        self.screen.tracer(0, 0)  # type: ignore
+        self.screen.bgcolor("black")  # type: ignore
         self.hideturtle()
         self.penup()
         self.speed(0)
         self.draw()
-        self.screen.mainloop()
+        self.screen.mainloop()  # type: ignore
 
-    def draw(self):
+    def draw(self) -> None:
         self.clear()
         for ridx, ring in enumerate(self.rings):
             time = getattr(self, ring)
             for bidx, bit in enumerate(reversed(time)):
                 self.drawbit(self.radii[ridx], bidx, len(time), bit, self.colors[ring])
-        self.screen.update()
-        self.screen.ontimer(self.draw, self.refresh_ms)
+        self.screen.update()  # type: ignore
+        self.screen.ontimer(self.draw, self.refresh_ms)  # type: ignore
 
-    def drawbit(self, radius, idx, max, bit, color):
+    def drawbit(self, radius: int, idx: int, max: int, bit: int, color: Color) -> None:
         if not bit:
             color = (0.8, 0.8, 0.8)
         self.home()
@@ -53,16 +66,17 @@ class BinClock(turtle.Turtle):
         self.dot(self.dotsz, color)
 
     @property
-    def hour(self):
+    def hour(self) -> Sequence[int]:
         return bits(time.localtime().tm_hour, 24)
 
     @property
-    def min(self):
+    def min(self) -> Sequence[int]:
         return bits(time.localtime().tm_min, 60)
 
     @property
-    def sec(self):
+    def sec(self) -> Sequence[int]:
         return bits(time.localtime().tm_sec, 60)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     BinClock().start()
