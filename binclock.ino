@@ -11,7 +11,10 @@ static char debug[DEBUG_SZ];
 #endif
 
 #define ULONG_MAX ((unsigned long) (-1))
-#define TIME_MS_MAX ((unsigned long) 1000 * 60 * 60 * 24)
+// How far from true msecs the clock is. E.g. 0.2% slow = -2/1000 = -2ms offset.
+#define CLOCK_ACCURACY_PER_THOU (-2)
+#define MS_PER_SEC (1000 + CLOCK_ACCURACY_PER_THOU)
+#define TIME_MS_MAX ((unsigned long) MS_PER_SEC * 60 * 60 * 24)
 
 // LEDs
 const static int hours[] = {8, 9, 10, 11, 12};
@@ -56,7 +59,7 @@ void loop() {
     unsigned int time[] = {off[0], off[1], 0};
     bool hour_pressed = pressed(incHour, &last_hour_st, LOW);
     bool min_pressed = pressed(incMin, &last_min_st, HIGH);
-    bool at_second = (1000 <= ellapsed);
+    bool at_second = (MS_PER_SEC <= ellapsed);
 
     if (hour_pressed) {
         DPRINTF("Hour+\n");
@@ -92,7 +95,7 @@ static bool pressed(unsigned int button, int *old, int active) {
 }
 
 static void setTime(unsigned int *time, unsigned long ms) {
-    unsigned long sec = time[2] + (ms / 1000);
+    unsigned long sec = time[2] + (ms / MS_PER_SEC);
     unsigned long min = time[1] + (sec / 60);
     unsigned long hr = time[0] + (min / 60);
     time[0] = hr % 24;
