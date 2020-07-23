@@ -4,7 +4,7 @@ ifneq ($(DEBUG),)
 CCOPTS += -DDEBUG=$(DEBUG)
 endif
 
-.PHONY: all lintpy
+.PHONY: all lintpy clean
 
 all: binclock
 
@@ -19,3 +19,6 @@ lintpy: $(wildcard *.py)
 	python -m isort --profile=black .
 	python -m mypy --strict .
 	python -m flake8 --ignore=E501,W503 .
+
+clean:
+	rm -f binclock.c binclock
