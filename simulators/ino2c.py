@@ -4,15 +4,15 @@ import sys
 from typing import List
 
 
-def find_statics(ino: str) -> List[str]:
+def find_decls(ino: str) -> List[str]:
     with open(ino) as f:
-        return re.findall(r"static[^;=]+{", f.read())
+        return re.findall(r"(?:static|struct)[^;=]+{", f.read())
 
 
-def add_header(ino: str, c: str, funcs: List[str]) -> None:
+def add_header(ino: str, c: str, decls: List[str]) -> None:
     header = "\n".join(
         ['#include "arduino.h"', ""]
-        + [" ".join(func.rstrip("{").split()) + ";" for func in funcs]
+        + [" ".join(decl.rstrip("{").split()) + ";" for decl in decls]
     )
     with open(ino, "r") as f:
         txt = re.sub(r"\bSerial\b(?!\.)", "Serial.Serial", f.read())
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     )
 
     try:
-        funcs = find_statics(ino)
-        add_header(ino, c, funcs)
+        decls = find_decls(ino)
+        add_header(ino, c, decls)
     except Exception as e:
         sys.exit(e)

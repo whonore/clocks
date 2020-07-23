@@ -16,6 +16,12 @@ static char debug[DEBUG_SZ];
 #define TICKS_PER_SEC (1000 + CLOCK_DRIFT_PER_THOU)
 #define TICKS_MAX ((unsigned long) TICKS_PER_SEC * 60 * 60 * 24)
 
+struct time_t {
+    unsigned int secs;
+    unsigned int mins;
+    unsigned int hours;
+};
+
 // LEDs
 const static int hours[] = {8, 9, 10, 11, 12};
 #define NHOURS (sizeof(hours) / sizeof(hours[0]))
@@ -32,7 +38,7 @@ static unsigned long prev_ticks = 0;
 static unsigned long total_ticks = 0;
 static int last_hour_st = HIGH;
 static int last_min_st = LOW;
-static unsigned int off[] = {0, 0}; // Hour, minute
+static struct time_t off = {.secs = 0, .mins = 0, .hours = 0};
 
 void setup() {
 #if DEBUG
@@ -53,23 +59,23 @@ void setup() {
 }
 
 void loop() {
+    struct time_t time;
     unsigned long ticks = millis();
     unsigned long ellapsed =
         prev_ticks < ticks ? ticks - prev_ticks : ticks + (ULONG_MAX - prev_ticks);
-    unsigned int time[] = {off[0], off[1], 0};
     bool hour_pressed = pressed(incHour, &last_hour_st, LOW);
     bool min_pressed = pressed(incMin, &last_min_st, HIGH);
     bool at_second = (TICKS_PER_SEC <= ellapsed);
 
     if (hour_pressed) {
         DPRINTF("Hour+\n");
-        time[0] = off[0] = off[0] + 1;
+        off.hours += 1;
         delay(100);
     }
 
     if (min_pressed) {
         DPRINTF("Minute+\n");
-        time[1] = off[1] = off[1] + 1;
+        off.mins += 1;
         delay(50);
     }
 
@@ -79,11 +85,12 @@ void loop() {
     }
 
     if (at_second || hour_pressed || min_pressed) {
-        ticksToTime(time, total_ticks);
-        dispTime(hours, time[0], NHOURS);
-        dispTime(mins, time[1], NMINS);
-        dispTime(secs, time[2], NSECS);
-        DPRINTF("H:%u\tM:%u\tS:%u\n", time[0], time[1], time[2]);
+        time = off;
+        ticksToTime(&time, total_ticks);
+        dispTime(hours, time.hours, NHOURS);
+        dispTime(mins, time.mins, NMINS);
+        dispTime(secs, time.secs, NSECS);
+        DPRINTF("H:%u\tM:%u\tS:%u\n", time.hours, time.mins, time.secs);
     }
 }
 
@@ -94,13 +101,13 @@ static bool pressed(unsigned int button, int *old, int active) {
     return (st == active && st_old != active);
 }
 
-static void ticksToTime(unsigned int *time, unsigned long ticks) {
-    unsigned long sec = time[2] + (ticks / TICKS_PER_SEC);
-    unsigned long min = time[1] + (sec / 60);
-    unsigned long hr = time[0] + (min / 60);
-    time[0] = hr % 24;
-    time[1] = min % 60;
-    time[2] = sec % 60;
+static void ticksToTime(struct time_t *time, unsigned long ticks) {
+    unsigned long sec = time->secs + (ticks / TICKS_PER_SEC);
+    unsigned long min = time->hours + (sec / 60);
+    unsigned long hr = time->hours + (min / 60);
+    time->hours = hr % 24;
+    time->mins = min % 60;
+    time->secs = sec % 60;
 }
 
 static void dispTime(const int *leds, unsigned int val, unsigned int nleds) {

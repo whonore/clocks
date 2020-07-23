@@ -11,7 +11,7 @@ all: binclock
 binclock: binclock.c arduino.h
 	gcc $(CCOPTS) $< -o $@ $(CCLINK)
 
-binclock.c: ../binclock.ino
+binclock.c: ../binclock.ino ino2c.py
 	python ino2c.py ../binclock.ino binclock.c
 
 lintpy: $(wildcard *.py)
