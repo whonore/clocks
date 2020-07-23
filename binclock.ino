@@ -12,9 +12,9 @@ static char debug[DEBUG_SZ];
 
 #define ULONG_MAX ((unsigned long) (-1))
 // How far from true msecs the clock is. E.g. 0.2% slow = -2/1000 = -2ms offset.
-#define CLOCK_ACCURACY_PER_THOU (-2)
-#define MS_PER_SEC (1000 + CLOCK_ACCURACY_PER_THOU)
-#define TIME_MS_MAX ((unsigned long) MS_PER_SEC * 60 * 60 * 24)
+#define CLOCK_DRIFT_PER_THOU (-2)
+#define TICKS_PER_SEC (1000 + CLOCK_DRIFT_PER_THOU)
+#define TICKS_MAX ((unsigned long) TICKS_PER_SEC * 60 * 60 * 24)
 
 // LEDs
 const static int hours[] = {8, 9, 10, 11, 12};
@@ -28,8 +28,8 @@ const static int secs[] = {A0, A1, A2, A3, A4, A5};
 const static int incHour = 0;
 const static int incMin = 13;
 
-static unsigned long last_ms = 0;
-static unsigned long last_time = 0;
+static unsigned long prev_ticks = 0;
+static unsigned long total_ticks = 0;
 static int last_hour_st = HIGH;
 static int last_min_st = LOW;
 static unsigned int off[] = {0, 0}; // Hour, minute
@@ -53,13 +53,13 @@ void setup() {
 }
 
 void loop() {
-    unsigned long time_ms = millis();
+    unsigned long ticks = millis();
     unsigned long ellapsed =
-        last_ms < time_ms ? time_ms - last_ms : time_ms + (ULONG_MAX - last_ms);
+        prev_ticks < ticks ? ticks - prev_ticks : ticks + (ULONG_MAX - prev_ticks);
     unsigned int time[] = {off[0], off[1], 0};
     bool hour_pressed = pressed(incHour, &last_hour_st, LOW);
     bool min_pressed = pressed(incMin, &last_min_st, HIGH);
-    bool at_second = (MS_PER_SEC <= ellapsed);
+    bool at_second = (TICKS_PER_SEC <= ellapsed);
 
     if (hour_pressed) {
         DPRINTF("Hour+\n");
@@ -74,12 +74,12 @@ void loop() {
     }
 
     if (at_second) {
-        last_time = (last_time + ellapsed) % TIME_MS_MAX;
-        last_ms = time_ms;
+        total_ticks = (total_ticks + ellapsed) % TICKS_MAX;
+        prev_ticks = ticks;
     }
 
     if (at_second || hour_pressed || min_pressed) {
-        setTime(time, last_time);
+        ticksToTime(time, total_ticks);
         dispTime(hours, time[0], NHOURS);
         dispTime(mins, time[1], NMINS);
         dispTime(secs, time[2], NSECS);
@@ -94,8 +94,8 @@ static bool pressed(unsigned int button, int *old, int active) {
     return (st == active && st_old != active);
 }
 
-static void setTime(unsigned int *time, unsigned long ms) {
-    unsigned long sec = time[2] + (ms / MS_PER_SEC);
+static void ticksToTime(unsigned int *time, unsigned long ticks) {
+    unsigned long sec = time[2] + (ticks / TICKS_PER_SEC);
     unsigned long min = time[1] + (sec / 60);
     unsigned long hr = time[0] + (min / 60);
     time[0] = hr % 24;
