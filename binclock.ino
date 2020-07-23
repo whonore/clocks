@@ -103,7 +103,7 @@ static bool pressed(unsigned int button, int *old, int active) {
 
 static void ticksToTime(struct time_t *time, unsigned long ticks) {
     unsigned long sec = time->secs + (ticks / TICKS_PER_SEC);
-    unsigned long min = time->hours + (sec / 60);
+    unsigned long min = time->mins + (sec / 60);
     unsigned long hr = time->hours + (min / 60);
     time->hours = hr % 24;
     time->mins = min % 60;
