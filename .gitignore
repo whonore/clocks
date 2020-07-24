@@ -2,3 +2,7 @@ binclock
 binclock.c
 *.stl
 *.fcstd1
+.lia.cache
+*.vo
+*.glob
+*.aux
