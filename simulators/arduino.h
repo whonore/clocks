@@ -3,6 +3,8 @@
 
 #include <assert.h>
 #include <math.h>
+#include <ncurses.h>
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -63,8 +65,11 @@ void pinMode(int pin, int mode) {
 }
 
 int digitalRead(int pin) {
+    int val;
     assert(pins[pin].mode == INPUT);
-    return LOW;
+    val = pins[pin].val;
+    pins[pin].val = LOW;
+    return val;
 }
 
 void digitalWrite(int pin, int val) {
@@ -76,60 +81,121 @@ int bitRead(int val, int bit) {
     return (val >> bit) & 1;
 }
 
+// Reading input
+static volatile bool quit = false;
+
+static void *getkb(void *_arg) {
+    int pin;
+
+    while (1) {
+        pin = getch();
+        if (pin == 'q') {
+            quit = true;
+            break;
+        }
+        if ('A' <= pin && pin <= 'A' + NPINS) {
+            pin -= 'A';
+            if (pins[pin].mode == INPUT) {
+                pins[pin].val = HIGH;
+            }
+        }
+    }
+
+    return NULL;
+}
+
 // Initialization
 void setup();
 void loop();
 
-static void arduino_init() {
+static void serial_init() {
     Serial.Serial = false;
     Serial.print = serial_print;
     Serial.begin = serial_begin;
     memset(Serial.out, '\0', SERIAL_OUT);
 }
 
-static void clear() {
-    printf("\x1b[2J");
+static void pins_init() {
+    int i;
+    for (i = 0; i < NPINS; i++) {
+        pins[i].mode = OUTPUT;
+        pins[i].val = LOW;
+    }
 }
 
-static void print_pin(struct pin_t *pin) {
-    if (pin->mode == OUTPUT) {
-        printf(" %s ", pin->val == HIGH ? "+" : "-");
+static void arduino_init() {
+    serial_init();
+    pins_init();
+}
+
+static void print_pin(int i) {
+    int x, y;
+    int c;
+    getyx(stdscr, y, x);
+
+    mvaddch(y - 1, x + 1, 'A' + i);
+
+    if (i < A0) {
+        mvprintw(y, x, "%2d", i);
     } else {
-        printf("   ");
+        mvprintw(y, x, "A%d", i - A0);
     }
+
+    c = (pins[i].mode == OUTPUT)
+        ? ('v' | ((pins[i].val == HIGH) ? A_REVERSE : 0))
+        : '^';
+    mvaddch(y + 1, x + 1, c);
+    move(y, x + 3);
 }
 
 static void display() {
-    static unsigned long iter = 0;
+    static unsigned long ticks = 0;
     int i = 0;
+    int y, x;
+    getmaxyx(stdscr, y, x);
+    int left = x / 2 - 3 * NPINS / 2;
 
-    clear();
+    mvprintw(y / 2 - 5, left, "Ticks:      %lu", ticks);
+    mvprintw(y / 2 - 4, left, "Time (sec): %lu", ticks / 1000);
+
+    move(y / 2 - 1, left);
+    for (i = 0; i < NPINS; i++) {
+        print_pin(i);
+    }
+
     if (Serial.out != NULL) {
-        printf("%s\n\n", Serial.out);
+        move(y / 2 + 5, 0);
+        clrtobot();
+        printw("%s", Serial.out);
     }
-    printf("Iteration:  %lu\nTime (sec): %lu\n\n", iter, iter / 1000);
 
-    for (i = 0; i < NPINS; i++) {
-        printf("%2d ", i);
-    }
-    printf("\n");
-    for (i = 0; i < NPINS; i++) {
-        print_pin(&pins[i]);
-    }
-    printf("\n");
-
-    iter += 1;
+    refresh();
+    ticks += 1;
 }
 
 int main(int argc, char **argv) {
     double factor = 1 < argc ? atof(argv[1]) : 1.0;
+    pthread_t tid;
+
+    initscr();
+    cbreak();
+    noecho();
+    curs_set(0);
+
     arduino_init();
+    assert(pthread_create(&tid, NULL, &getkb, NULL) == 0);
     setup();
     while (1) {
         loop();
         display();
         usleep((unsigned int) (1000 / factor));
+        if (quit) {
+            assert(pthread_join(tid, NULL) == 0);
+            break;
+        }
     }
+
+    endwin();
     return 0;
 }
 

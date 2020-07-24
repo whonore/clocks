@@ -1,5 +1,5 @@
 CCOPTS := -Wall
-CCLINK := -lm
+CCLINK := -lm -lpthread -lncurses
 ifneq ($(DEBUG),)
 CCOPTS += -DDEBUG=$(DEBUG)
 endif
