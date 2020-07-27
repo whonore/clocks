@@ -1,7 +1,7 @@
 binclock
 binclock.c
 *.stl
-*.fcstd1
+*.[fF][cC][sS]td1
 .lia.cache
 *.vo
 *.glob
