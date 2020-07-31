@@ -8,11 +8,11 @@ endif
 
 all: binclock
 
-binclock: binclock.c arduino.h
-	gcc $(CCOPTS) $< -o $@ $(CCLINK)
+binclock: binclock.c arduino.c arduino.h
+	gcc $(CCOPTS) -o $@ $< arduino.c $(CCLINK)
 
 binclock.c: ../binclock.ino ino2c.py
-	python ino2c.py ../binclock.ino binclock.c
+	./ino2c.py ../binclock.ino $@
 
 lintpy: $(wildcard *.py)
 	python -m black .
