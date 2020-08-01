@@ -29,25 +29,25 @@ void serial_begin(unsigned int baud) {
 
 // Library
 static double time_factor;
-static unsigned long usec_offset;
+static uint32_t usec_offset;
 
-#define SCALE_TIME(usec) ((unsigned long) (_micros() * time_factor))
+#define SCALE_TIME(usec) ((uint32_t) (_micros() * time_factor))
 
-static unsigned long _micros() {
+static uint32_t _micros() {
     struct timespec ticks;
     assert(clock_gettime(CLOCK_MONOTONIC, &ticks) == 0);
     return (ticks.tv_sec * 1000000) + (ticks.tv_nsec / 1000) - usec_offset;
 }
 
-unsigned long micros() {
+uint32_t micros() {
     return SCALE_TIME(_micros());
 }
 
-unsigned long millis() {
+uint32_t millis() {
     return micros() / 1000;
 }
 
-void delay(unsigned long ms) {
+void delay(uint32_t ms) {
     struct timespec time;
     time.tv_sec = ms / 1000;
     time.tv_nsec = (ms - time.tv_sec * 1000) * 1000000;
@@ -58,8 +58,8 @@ void pinMode(uint8_t pin, uint8_t mode) {
     pins[pin].mode = mode;
 }
 
-int digitalRead(uint8_t pin) {
-    int val;
+uint8_t digitalRead(uint8_t pin) {
+    uint8_t val;
     assert(pins[pin].mode == INPUT);
     val = pins[pin].val;
     pins[pin].val = LOW;
@@ -77,17 +77,28 @@ static volatile bool quit = false;
 static void *getkb(void *_arg) {
     int pin;
 
-    while (1) {
+    while (!quit) {
         pin = getch();
-        if (pin == 'q') {
-            quit = true;
-            break;
-        }
-        if ('A' <= pin && pin <= 'A' + NPINS) {
-            pin -= 'A';
-            if (pins[pin].mode == INPUT) {
-                pins[pin].val = HIGH;
-            }
+        switch (pin) {
+            case 'q':
+                quit = true;
+                break;
+            case '+':
+                time_factor += 1;
+                break;
+            case '-':
+                time_factor -= 1;
+                break;
+            case ' ':
+                time_factor = 1;
+                break;
+            default:
+                if ('A' <= pin && pin <= 'A' + NPINS) {
+                    pin -= 'A';
+                    if (pins[pin].mode == INPUT) {
+                        pins[pin].val = HIGH;
+                    }
+                }
         }
     }
 
@@ -136,15 +147,17 @@ static void print_pin(int i) {
 }
 
 static void display() {
-    unsigned long usec = _micros();
-    unsigned long usec_scaled = SCALE_TIME(usec);
+    uint32_t usec = _micros();
+    uint32_t usec_scaled = SCALE_TIME(usec);
     int i = 0;
     int y, x;
     getmaxyx(stdscr, y, x);
     int left = x / 2 - 3 * NPINS / 2;
 
-    mvprintw(y / 2 - 5, left, "Time (simulated): %lu", usec_scaled / 1000000);
-    mvprintw(y / 2 - 4, left, "Time (true):      %lu", usec / 1000000);
+    mvprintw(y / 2 - 5, left, "Time (simulated x%.2f): %u",
+             time_factor, usec_scaled / 1000000);
+    mvprintw(y / 2 - 4, left, "Time (true):              %u",
+             usec / 1000000);
 
     move(y / 2 - 1, left);
     for (i = 0; i < NPINS; i++) {

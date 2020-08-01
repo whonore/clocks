@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 typedef uint8_t byte;
 
@@ -30,11 +31,11 @@ struct Serial_t {
 } Serial;
 
 // Library
-unsigned long micros();
-unsigned long millis();
-void delay(unsigned long ms);
+uint32_t micros();
+uint32_t millis();
+void delay(uint32_t ms);
 void pinMode(uint8_t pin, uint8_t mode);
-int digitalRead(uint8_t pin);
+uint8_t digitalRead(uint8_t pin);
 void digitalWrite(uint8_t pin, uint8_t val);
 
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
