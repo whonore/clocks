@@ -28,7 +28,7 @@ static char debug[DEBUG_SZ];
 #endif
 
 typedef uint64_t ticks_t;
-#define TICKS_MAX ((ticks_t) (-1))
+#define TICKS_MAX ((ticks_t) ((uint32_t) (-1)))
 // How far from true TICK_UNIT the clock is.
 // E.g. 0.15% slow = -1500/1000000 = -1.5ms offset.
 #define CLOCK_DRIFT_PER_MIL (-1500)
@@ -68,13 +68,13 @@ void setup() {
     Serial.begin(9600);
     while (!Serial) {}
 #endif
-    for (unsigned int i = 0; i < NHOURS; i++) {
+    for (byte i = 0; i < NHOURS; i++) {
         pinMode(hours[i], OUTPUT);
     }
-    for (unsigned int i = 0; i < NMINS; i++) {
+    for (byte i = 0; i < NMINS; i++) {
         pinMode(mins[i], OUTPUT);
     }
-    for (unsigned int i = 0; i < NSECS; i++) {
+    for (byte i = 0; i < NSECS; i++) {
         pinMode(secs[i], OUTPUT);
     }
     pinMode(incHour, INPUT);
@@ -118,23 +118,23 @@ void loop() {
 }
 
 static bool pressed(pin_t button, byte *old, byte active) {
-    int st = digitalRead(button);
-    int st_old = *old;
+    byte st = digitalRead(button);
+    byte st_old = *old;
     *old = st;
     return (st == active && st_old != active);
 }
 
 static void ticksToTime(struct time_t *time, ticks_t ticks) {
-    unsigned int sec = time->secs + (ticks / TICKS_PER_SEC);
-    unsigned int min = time->mins + (sec / 60);
-    unsigned int hr = time->hours + (min / 60);
+    uint32_t sec = time->secs + (ticks / TICKS_PER_SEC);
+    uint32_t min = time->mins + (sec / 60);
+    uint32_t hr = time->hours + (min / 60);
     time->hours = hr % 24;
     time->mins = min % 60;
     time->secs = sec % 60;
 }
 
-static void dispTime(const pin_t *leds, unsigned int val, unsigned int nleds) {
-    for (unsigned int i = 0; i < nleds; i++) {
+static void dispTime(const pin_t *leds, byte val, byte nleds) {
+    for (byte i = 0; i < nleds; i++) {
         digitalWrite(leds[i], bitRead(val, i) ? HIGH : LOW);
     }
 }
