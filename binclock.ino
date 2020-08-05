@@ -1,22 +1,22 @@
 #include "binclock.h"
 
 #if NEOPIXEL
-const static ring_t secs = RING(NSECS, 0);
-const static ring_t mins = RING(NMINS, NSECS);
-const static ring_t hours = RING(NHOURS, NSECS + NMINS);
+static const ring_t secs = RING(NSECS, 0);
+static const ring_t mins = RING(NMINS, NSECS);
+static const ring_t hours = RING(NHOURS, NSECS + NMINS);
 Adafruit_NeoPixel leds(NSECS + NMINS + NHOURS, 2, NEO_RGB + NEO_KHZ800);
 #else
-constexpr const static ring_t secs = RING(((pin_t[NSECS]) {A0, A1, A2, A3, A4, A5}));
+static constexpr ring_t secs = RING(((pin_t[NSECS]) {A0, A1, A2, A3, A4, A5}));
 static_assert(secs.nsegs == NSECS, "Wrong number of secs");
-constexpr const static ring_t mins = RING(((pin_t[NMINS]) {2, 3, 4, 5, 6, 7}));
+static constexpr ring_t mins = RING(((pin_t[NMINS]) {2, 3, 4, 5, 6, 7}));
 static_assert(mins.nsegs == NMINS, "Wrong number of mins");
-constexpr const static ring_t hours = RING(((pin_t[NHOURS]) {8, 9, 10, 11, 12}));
+static constexpr ring_t hours = RING(((pin_t[NHOURS]) {8, 9, 10, 11, 12}));
 static_assert(hours.nsegs == NHOURS, "Wrong number of hours");
 #endif
 
 // Buttons
-const static pin_t incHour = 0;
-const static pin_t incMin = 13;
+static const pin_t incHour = 0;
+static const pin_t incMin = 13;
 
 static byte last_hour_st = HIGH;
 static byte last_min_st = LOW;

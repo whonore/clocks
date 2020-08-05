@@ -1,3 +1,6 @@
+#ifndef BINCLOCK_H
+#define BINCLOCK_H
+
 // Util
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
@@ -46,7 +49,8 @@ typedef uint64_t ticks_t;
 #define CLOCK_DRIFT_TICKS (CLOCK_DRIFT_PER_MIL / (1000000 / TICK_UNIT))
 #define TICKS_PER_SEC ((ticks_t) TICK_UNIT + CLOCK_DRIFT_TICKS)
 #define TICKS_PER_DAY ((ticks_t) TICKS_PER_SEC * 60 * 60 * 24)
-static_assert(TICKS_PER_DAY / TICKS_PER_SEC == (ticks_t) 60 * 60 * 24, "Ticks overflowed");
+static_assert(TICKS_PER_DAY / TICKS_PER_SEC == (ticks_t) 60 * 60 * 24,
+              "Ticks overflowed");
 
 struct time_t {
     byte secs;
@@ -78,3 +82,5 @@ struct ring_t {
 #else
 #define RING(ps) { .pins = (ps), .nsegs = ARRAY_LEN(ps) }
 #endif
+
+#endif /* BINCLOCK_H */
