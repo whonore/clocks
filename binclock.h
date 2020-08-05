@@ -25,6 +25,10 @@ static char debug[DEBUG_SZ];
 #define DPRINTF(...) do {} while (0)
 #endif
 
+#ifndef STARTUP
+#define STARTUP 1
+#endif
+
 // Time
 #define USECS 1000000
 #define MSECS 1000

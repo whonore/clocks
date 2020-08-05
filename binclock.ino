@@ -53,6 +53,10 @@ void setup() {
 
     pinMode(incHour, INPUT);
     pinMode(incMin, INPUT);
+
+#if STARTUP
+    startup();
+#endif
 }
 
 void loop() {
@@ -84,15 +88,7 @@ void loop() {
     if (at_second || hour_pressed || min_pressed) {
         time = off;
         ticksToTime(&time, total_ticks);
-#if NEOPIXEL
-        leds.clear();
-#endif
-        dispTime(&secs, time.secs);
-        dispTime(&mins, time.mins);
-        dispTime(&hours, time.hours);
-#if NEOPIXEL
-        leds.show();
-#endif
+        dispTimes(time.secs, time.mins, time.hours);
         DPRINTF("H:%u\tM:%u\tS:%u\n", time.hours, time.mins, time.secs);
     }
 }
@@ -111,6 +107,18 @@ static void ticksToTime(struct time_t *time, ticks_t ticks) {
     time->hours = hr % 24;
     time->mins = min % 60;
     time->secs = sec % 60;
+}
+
+static void dispTimes(byte sec, byte min, byte hour) {
+#if NEOPIXEL
+        leds.clear();
+#endif
+        dispTime(&secs, sec);
+        dispTime(&mins, min);
+        dispTime(&hours, hour);
+#if NEOPIXEL
+        leds.show();
+#endif
 }
 
 static void dispTime(const ring_t *ring, byte val) {
@@ -137,6 +145,25 @@ static void setColors(const struct ring_t *ring, const color_t start, const colo
         for (byte i = 0; i < ring->nsegs; i++) {
             ring->colors[i][c] = start[c] + step * i;
         }
+    }
+}
+#endif
+
+#if STARTUP
+static void startup() {
+    const byte nlights = 4;
+    const uint32_t mask = (1 << nlights) - 1;
+    const uint32_t sec_mask = (1 << NSECS) - 1;
+    const uint32_t min_mask = (1 << NMINS) - 1;
+    const uint32_t hour_mask = (1 << NHOURS) - 1;
+    uint32_t time;
+
+    for (byte i = 1; i < NSECS + NMINS + NHOURS; i++) {
+        time = i < nlights ? mask >> (nlights - i) : mask << (i - nlights);
+        dispTimes(time & sec_mask,
+                  (time >> NSECS) & min_mask,
+                  (time >> (NSECS + NMINS)) & hour_mask);
+        delay(50);
     }
 }
 #endif
