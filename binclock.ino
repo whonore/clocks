@@ -1,57 +1,18 @@
-#define STATIC_ASSERT(name, test) typedef char assert_##name[(!!(test)) ? 1 : -1]
+#include "binclock.h"
 
-#ifndef DEBUG
-#define DEBUG 0
-#endif
-
-#if DEBUG
-#define DEBUG_SZ 256
-static char debug[DEBUG_SZ];
-#define DPRINTF(...) snprintf(debug, DEBUG_SZ, __VA_ARGS__); Serial.print(debug)
+#if NEOPIXEL
+const static ring_t secs = RING(NSECS, 0);
+const static ring_t mins = RING(NMINS, NSECS);
+const static ring_t hours = RING(NHOURS, NSECS + NMINS);
+Adafruit_NeoPixel leds(NSECS + NMINS + NHOURS, 2, NEO_RGB + NEO_KHZ800);
 #else
-#define DPRINTF(...) do {} while (0)
+constexpr const static ring_t secs = RING(((pin_t[NSECS]) {A0, A1, A2, A3, A4, A5}));
+static_assert(secs.nsegs == NSECS, "Wrong number of secs");
+constexpr const static ring_t mins = RING(((pin_t[NMINS]) {2, 3, 4, 5, 6, 7}));
+static_assert(mins.nsegs == NMINS, "Wrong number of mins");
+constexpr const static ring_t hours = RING(((pin_t[NHOURS]) {8, 9, 10, 11, 12}));
+static_assert(hours.nsegs == NHOURS, "Wrong number of hours");
 #endif
-
-#define USECS 1000000
-#define MSECS 1000
-
-#ifndef TICK_UNIT
-#define TICK_UNIT USECS
-#endif
-
-#if TICK_UNIT == USECS
-#define TICK() micros()
-#elif TICK_UNIT == MSECS
-#define TICK() millis()
-#else
-#error "TICK_UNIT must be USECS or MSECS"
-#endif
-
-typedef uint64_t ticks_t;
-#define TICKS_MAX ((ticks_t) ((uint32_t) (-1)))
-// How far from true TICK_UNIT the clock is.
-// E.g. 0.15% slow = -1500/1000000 = -1.5ms offset.
-#define CLOCK_DRIFT_PER_MIL (-1500)
-#define CLOCK_DRIFT_TICKS (CLOCK_DRIFT_PER_MIL / (1000000 / TICK_UNIT))
-#define TICKS_PER_SEC ((ticks_t) TICK_UNIT + CLOCK_DRIFT_TICKS)
-#define TICKS_PER_DAY ((ticks_t) TICKS_PER_SEC * 60 * 60 * 24)
-STATIC_ASSERT(ticks_correct, TICKS_PER_DAY / TICKS_PER_SEC == (ticks_t) 60 * 60 * 24);
-
-struct time_t {
-    byte secs;
-    byte mins;
-    byte hours;
-};
-
-typedef byte pin_t;
-
-// LEDs
-const static pin_t hours[] = {8, 9, 10, 11, 12};
-#define NHOURS (sizeof(hours) / sizeof(hours[0]))
-const static pin_t mins[] = {2, 3, 4, 5, 6, 7};
-#define NMINS (sizeof(mins) / sizeof(mins[0]))
-const static pin_t secs[] = {A0, A1, A2, A3, A4, A5};
-#define NSECS (sizeof(secs) / sizeof(secs[0]))
 
 // Buttons
 const static pin_t incHour = 0;
@@ -61,22 +22,35 @@ static byte last_hour_st = HIGH;
 static byte last_min_st = LOW;
 static ticks_t prev_ticks = 0;
 static ticks_t total_ticks = 0;
-static struct time_t off = {.secs = 0, .mins = 0, .hours = 0};
+static struct time_t off = { .secs = 0, .mins = 0, .hours = 0 };
 
 void setup() {
 #if DEBUG
     Serial.begin(9600);
     while (!Serial) {}
 #endif
-    for (byte i = 0; i < NHOURS; i++) {
-        pinMode(hours[i], OUTPUT);
+
+    const ring_t rings[] = {secs, mins, hours};
+#if NEOPIXEL
+    const color_t colors[] = {
+        {0, 0, 255}, {100, 0, 100}, // Seconds
+        {0, 255, 0}, {0, 100, 100}, // Minutes
+        {255, 0, 0}, {100, 100, 0}, // Hours
+    };
+    leds.begin();
+    leds.show();
+#endif
+
+    for (byte r = 0; r < ARRAY_LEN(rings); r++) {
+#if NEOPIXEL
+        setColors(&rings[r], colors[2 * r], colors[2 * r + 1]);
+#else
+        for (byte i = 0; i < rings[r].nsegs; i++) {
+            pinMode(rings[r].pins[i], OUTPUT);
+        }
+#endif
     }
-    for (byte i = 0; i < NMINS; i++) {
-        pinMode(mins[i], OUTPUT);
-    }
-    for (byte i = 0; i < NSECS; i++) {
-        pinMode(secs[i], OUTPUT);
-    }
+
     pinMode(incHour, INPUT);
     pinMode(incMin, INPUT);
 }
@@ -110,9 +84,15 @@ void loop() {
     if (at_second || hour_pressed || min_pressed) {
         time = off;
         ticksToTime(&time, total_ticks);
-        dispTime(hours, time.hours, NHOURS);
-        dispTime(mins, time.mins, NMINS);
-        dispTime(secs, time.secs, NSECS);
+#if NEOPIXEL
+        leds.clear();
+#endif
+        dispTime(&secs, time.secs);
+        dispTime(&mins, time.mins);
+        dispTime(&hours, time.hours);
+#if NEOPIXEL
+        leds.show();
+#endif
         DPRINTF("H:%u\tM:%u\tS:%u\n", time.hours, time.mins, time.secs);
     }
 }
@@ -133,8 +113,30 @@ static void ticksToTime(struct time_t *time, ticks_t ticks) {
     time->secs = sec % 60;
 }
 
-static void dispTime(const pin_t *leds, byte val, byte nleds) {
-    for (byte i = 0; i < nleds; i++) {
-        digitalWrite(leds[i], bitRead(val, i) ? HIGH : LOW);
+static void dispTime(const ring_t *ring, byte val) {
+    for (byte i = 0; i < ring->nsegs; i++) {
+#if NEOPIXEL
+        if (bitRead(val, i)) {
+            leds.setPixelColor(ring->offset + i,
+                               ring->colors[i][0],
+                               ring->colors[i][1],
+                               ring->colors[i][2]);
+        }
+#else
+        digitalWrite(ring->pins[i], bitRead(val, i) ? HIGH : LOW);
+#endif
     }
 }
+
+#if NEOPIXEL
+static void setColors(const struct ring_t *ring, const color_t start, const color_t end) {
+    int step;
+    for (byte c = 0; c < 3; c++) {
+        step = abs(start[c] - end[c]) / (ring->nsegs - 1);
+        step *= start[c] < end[c] ? 1 : -1;
+        for (byte i = 0; i < ring->nsegs; i++) {
+            ring->colors[i][c] = start[c] + step * i;
+        }
+    }
+}
+#endif
