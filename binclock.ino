@@ -158,12 +158,12 @@ static void startup() {
     const uint32_t hour_mask = (1 << NHOURS) - 1;
     uint32_t time;
 
-    for (byte i = 1; i < NSECS + NMINS + NHOURS; i++) {
+    for (byte i = 1; i <= NSECS + NMINS + NHOURS; i++) {
         time = i < nlights ? mask >> (nlights - i) : mask << (i - nlights);
         dispTimes(time & sec_mask,
                   (time >> NSECS) & min_mask,
                   (time >> (NSECS + NMINS)) & hour_mask);
-        delay(50);
+        delay(100);
     }
 }
 #endif
