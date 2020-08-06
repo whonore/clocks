@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 typedef uint8_t byte;
 
@@ -23,12 +24,17 @@ typedef uint8_t byte;
 
 // Serial
 #define SERIAL_OUT 256
-struct Serial_t {
-    bool Serial;
-    void (*print)(const char *str);
-    void (*begin)(unsigned int baud);
-    char _out[SERIAL_OUT];
-} Serial;
+class Serial_ {
+    private:
+        bool init;
+    public:
+        char _out[SERIAL_OUT];
+        Serial_() { memset(this->_out, '\0', SERIAL_OUT); }
+        void begin(unsigned int baud);
+        void print(const char *str);
+        operator bool();
+};
+extern Serial_ Serial;
 
 // Library
 uint32_t micros();

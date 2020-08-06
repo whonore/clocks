@@ -1,5 +1,5 @@
 binclock
-binclock.c
+binclock.cpp
 *.stl
 *.[fF][cC][sS]td1
 .lia.cache

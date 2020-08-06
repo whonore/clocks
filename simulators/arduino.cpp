@@ -14,17 +14,23 @@ struct pin_t { uint8_t mode; uint8_t val; };
 static struct pin_t pins[NPINS];
 
 // Serial
-void serial_print(const char *str) {
-    int len = strnlen(Serial._out, SERIAL_OUT);
+Serial_ Serial;
+
+void Serial_::print(const char *str) {
+    int len = strnlen(this->_out, SERIAL_OUT);
     if (len == SERIAL_OUT - 1) {
-        memset(Serial._out, '\0', SERIAL_OUT);
+        memset(this->_out, '\0', SERIAL_OUT);
         len = 0;
     }
-    strncat(Serial._out, str, SERIAL_OUT - len - 1);
+    strncat(this->_out, str, SERIAL_OUT - len - 1);
 }
 
-void serial_begin(unsigned int baud) {
-    Serial.Serial = true;
+void Serial_::begin(unsigned int baud) {
+    this->init = true;
+}
+
+Serial_::operator bool() {
+    return this->init;
 }
 
 // Library
@@ -106,13 +112,6 @@ static void *getkb(void *_arg) {
 }
 
 // Initialization
-static void serial_init() {
-    Serial.Serial = false;
-    Serial.print = serial_print;
-    Serial.begin = serial_begin;
-    memset(Serial._out, '\0', SERIAL_OUT);
-}
-
 static void pins_init() {
     int i;
     for (i = 0; i < NPINS; i++) {
@@ -122,7 +121,6 @@ static void pins_init() {
 }
 
 static void arduino_init() {
-    serial_init();
     pins_init();
 }
 

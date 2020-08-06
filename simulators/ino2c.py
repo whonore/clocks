@@ -2,39 +2,43 @@
 import os
 import re
 import sys
-from typing import List
+from typing import List, Tuple
 
 
-def find_decls(ino: str) -> List[str]:
+def find_decls(ino: str) -> Tuple[List[str], List[str]]:
     with open(ino) as f:
-        return re.findall(
-            r"^(?:(?:static|struct)[^;=]+{|typedef[^;]+;)", f.read(), re.MULTILINE
+        txt = f.read()
+        incls = re.findall(r"^#include.*$", txt, re.MULTILINE)
+        decls = re.findall(
+            r"^(?:(?:static|struct)[^;=]+{|typedef[^;]+;)", txt, re.MULTILINE
         )
+        return incls, decls
 
 
-def add_header(ino: str, c: str, decls: List[str]) -> None:
+def add_header(ino: str, c: str, incls: List[str], decls: List[str]) -> None:
     header = "\n".join(
         ['#include "arduino.h"', ""]
+        + [" ".join(incl.split()) for incl in incls]
         + [" ".join(decl.rstrip("{;").split()) + ";" for decl in decls]
     )
     with open(ino, "r") as f:
-        txt = re.sub(r"\bSerial\b(?!\.)", "Serial.Serial", f.read())
+        txt = f.read()
     with open(c, "w") as f:
         f.write(header + "\n\n" + txt)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        sys.exit("Usage: ino2c input.ino [output.c]")
+        sys.exit("Usage: ino2c input.ino [output.cpp]")
     ino = sys.argv[1]
     c = (
         sys.argv[2]
         if len(sys.argv) >= 3
-        else os.path.basename(os.path.splitext(ino)[0]) + ".c"
+        else os.path.basename(os.path.splitext(ino)[0]) + ".cpp"
     )
 
     try:
-        decls = find_decls(ino)
-        add_header(ino, c, decls)
+        incls, decls = find_decls(ino)
+        add_header(ino, c, incls, decls)
     except Exception as e:
         sys.exit(e)

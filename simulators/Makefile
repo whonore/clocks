@@ -1,5 +1,5 @@
-CCOPTS := -Wall
-CCLINK := -lm -lpthread -lncurses
+CCOPTS := -Wall -Wextra -DNEOPIXEL=0
+CCLINK := -lpthread -lncurses
 ifneq ($(DEBUG),)
 CCOPTS += -DDEBUG=$(DEBUG)
 endif
@@ -11,10 +11,10 @@ endif
 
 all: binclock
 
-binclock: binclock.c arduino.c arduino.h
-	gcc $(CCOPTS) -o $@ $< arduino.c $(CCLINK)
+binclock: binclock.cpp arduino.cpp arduino.h
+	g++ $(CCOPTS) -o $@ $< arduino.cpp $(CCLINK)
 
-binclock.c: ../binclock.ino ino2c.py
+binclock.cpp: ../binclock.ino ino2c.py
 	./ino2c.py ../binclock.ino $@
 
 lintpy: $(wildcard *.py)
@@ -24,4 +24,4 @@ lintpy: $(wildcard *.py)
 	python -m flake8 --ignore=E501,W503 .
 
 clean:
-	rm -f binclock.c binclock
+	rm -f binclock.cpp binclock
