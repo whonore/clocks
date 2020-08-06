@@ -33,9 +33,9 @@ void setup() {
     const ring_t rings[] = {secs, mins, hours};
 #if NEOPIXEL
     const color_t colors[] = {
-        {0, 0, 255}, {100, 0, 100}, // Seconds
-        {0, 255, 0}, {0, 100, 100}, // Minutes
-        {255, 0, 0}, {100, 100, 0}, // Hours
+        SEC_COLOR1, SEC_COLOR2,
+        MIN_COLOR1, MIN_COLOR2,
+        HOUR_COLOR1, HOUR_COLOR2
     };
     leds.begin();
     leds.show();

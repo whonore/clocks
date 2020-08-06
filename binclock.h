@@ -1,20 +1,13 @@
 #ifndef BINCLOCK_H
 #define BINCLOCK_H
 
+#include "config.h"
+
 // Util
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
-// Config
-#ifndef NEOPIXEL
-#define NEOPIXEL 1
-#endif
-
 #if NEOPIXEL
 #include <Adafruit_NeoPixel.h>
-#endif
-
-#ifndef DEBUG
-#define DEBUG 0
 #endif
 
 #if DEBUG
@@ -25,18 +18,7 @@ static char debug[DEBUG_SZ];
 #define DPRINTF(...) do {} while (0)
 #endif
 
-#ifndef STARTUP
-#define STARTUP 1
-#endif
-
 // Time
-#define USECS 1000000
-#define MSECS 1000
-
-#ifndef TICK_UNIT
-#define TICK_UNIT USECS
-#endif
-
 #if TICK_UNIT == USECS
 #define TICK() micros()
 #elif TICK_UNIT == MSECS
@@ -47,9 +29,6 @@ static char debug[DEBUG_SZ];
 
 typedef uint64_t ticks_t;
 #define TICKS_MAX ((ticks_t) ((uint32_t) (-1)))
-// How far from true TICK_UNIT the clock is.
-// E.g. 0.15% slow = -1500/1000000 = -1.5ms offset.
-#define CLOCK_DRIFT_PER_MIL (-1500)
 #define CLOCK_DRIFT_TICKS (CLOCK_DRIFT_PER_MIL / (1000000 / TICK_UNIT))
 #define TICKS_PER_SEC ((ticks_t) TICK_UNIT + CLOCK_DRIFT_TICKS)
 #define TICKS_PER_DAY ((ticks_t) TICKS_PER_SEC * 60 * 60 * 24)
