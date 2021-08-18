@@ -1,5 +1,6 @@
 #include "binclock.h"
 
+// The state of each ring.
 #if NEOPIXEL
 static const ring_t secs = RING(NSECS, 0);
 static const ring_t mins = RING(NMINS, NSECS);
@@ -14,14 +15,21 @@ static constexpr ring_t hours = RING(((pin_t[NHOURS]) {8, 9, 10, 11, 12}));
 static_assert(hours.nsegs == NHOURS, "Wrong number of hours");
 #endif
 
-// Buttons
+// The buttons to manually increment the minute and hour.
 static const pin_t incHour = 0;
 static const pin_t incMin = 13;
 
+// The previous voltage state read for each button.
 static byte last_hour_st = HIGH;
 static byte last_min_st = LOW;
+
+// The previous (since the last loop) and total (modulo TICKS_PER_DAY) number
+// of ticks.
 static ticks_t prev_ticks = 0;
 static ticks_t total_ticks = 0;
+
+// The time offset to add to the Arduino's internal clock. Set by pressing the
+// minute and hour buttons.
 static struct time_t off = { .secs = 0, .mins = 0, .hours = 0 };
 
 void setup() {
@@ -41,6 +49,7 @@ void setup() {
     leds.show();
 #endif
 
+    // Initialize the pins for each ring segment.
     for (byte r = 0; r < ARRAY_LEN(rings); r++) {
 #if NEOPIXEL
         setColors(&rings[r], colors[2 * r], colors[2 * r + 1]);
@@ -51,48 +60,62 @@ void setup() {
 #endif
     }
 
+    // Initialize the button pins.
     pinMode(incHour, INPUT);
     pinMode(incMin, INPUT);
 
 #if STARTUP
+    // Display the startup animation.
     startup();
 #endif
 }
 
 void loop() {
-    struct time_t time;
+    // Compute the time difference in TICK_UNIT since the last loop, accounting
+    // for overflow.
     ticks_t ticks = TICK();
     ticks_t ellapsed =
         prev_ticks < ticks ? ticks - prev_ticks : ticks + (TICKS_MAX - prev_ticks);
-    bool hour_pressed = pressed(incHour, &last_hour_st, LOW);
-    bool min_pressed = pressed(incMin, &last_min_st, HIGH);
+
+    // Check if a second has passed.
     bool at_second = (TICKS_PER_SEC <= ellapsed);
 
+    // Check if either button was pressed.
+    bool hour_pressed = pressed(incHour, &last_hour_st, LOW);
+    bool min_pressed = pressed(incMin, &last_min_st, HIGH);
+
+    // Increment the hour.
     if (hour_pressed) {
         DPRINTF("Hour+\n");
         off.hours += 1;
         delay(100);
     }
 
+    // Increment the minute.
     if (min_pressed) {
         DPRINTF("Minute+\n");
         off.mins += 1;
         delay(50);
     }
 
+    // At least a second has passed so update the current time.
     if (at_second) {
         total_ticks = (total_ticks + ellapsed) % TICKS_PER_DAY;
         prev_ticks = ticks;
     }
 
+    // Update the display.
     if (at_second || hour_pressed || min_pressed) {
-        time = off;
+        struct time_t time = off;
         ticksToTime(&time, total_ticks);
         dispTimes(time.secs, time.mins, time.hours);
         DPRINTF("H:%u\tM:%u\tS:%u\n", time.hours, time.mins, time.secs);
     }
 }
 
+// Was `button` pressed?
+// True if its state matches `active` and differs from `old`.
+// Also stores the new state in `old`.
 static bool pressed(pin_t button, byte *old, byte active) {
     byte st = digitalRead(button);
     byte st_old = *old;
@@ -100,15 +123,17 @@ static bool pressed(pin_t button, byte *old, byte active) {
     return (st == active && st_old != active);
 }
 
+// Convert `ticks` to seconds, minutes, and hours and add them to `time`.
 static void ticksToTime(struct time_t *time, ticks_t ticks) {
     uint32_t sec = time->secs + (ticks / TICKS_PER_SEC);
     uint32_t min = time->mins + (sec / 60);
-    uint32_t hr = time->hours + (min / 60);
-    time->hours = hr % 24;
+    uint32_t hour = time->hours + (min / 60);
+    time->hours = hour % 24;
     time->mins = min % 60;
     time->secs = sec % 60;
 }
 
+// Update the ring segment LEDs.
 static void dispTimes(byte sec, byte min, byte hour) {
 #if NEOPIXEL
         leds.clear();
@@ -121,7 +146,9 @@ static void dispTimes(byte sec, byte min, byte hour) {
 #endif
 }
 
+// Update a single ring's LEDs.
 static void dispTime(const ring_t *ring, byte val) {
+    // Turn on or off each LED based on the corresponding bit of `val`.
     for (byte i = 0; i < ring->nsegs; i++) {
 #if NEOPIXEL
         if (bitRead(val, i)) {
@@ -137,10 +164,10 @@ static void dispTime(const ring_t *ring, byte val) {
 }
 
 #if NEOPIXEL
+// Compute the color for each segment by interpolating from `start` to `end`.
 static void setColors(const struct ring_t *ring, const color_t start, const color_t end) {
-    int step;
     for (byte c = 0; c < 3; c++) {
-        step = abs(start[c] - end[c]) / (ring->nsegs - 1);
+        int step = abs(start[c] - end[c]) / (ring->nsegs - 1);
         step *= start[c] < end[c] ? 1 : -1;
         for (byte i = 0; i < ring->nsegs; i++) {
             ring->colors[i][c] = start[c] + step * i;
@@ -150,16 +177,18 @@ static void setColors(const struct ring_t *ring, const color_t start, const colo
 #endif
 
 #if STARTUP
+// Display an animation in which `nlights` consecutive segments spiral inwards
+// around the rings.
 static void startup() {
     const byte nlights = 4;
     const uint32_t mask = (1 << nlights) - 1;
     const uint32_t sec_mask = (1 << NSECS) - 1;
     const uint32_t min_mask = (1 << NMINS) - 1;
     const uint32_t hour_mask = (1 << NHOURS) - 1;
-    uint32_t time;
 
+    // Shift a mask of `nlights` bits to the left.
     for (byte i = 1; i <= NSECS + NMINS + NHOURS; i++) {
-        time = i < nlights ? mask >> (nlights - i) : mask << (i - nlights);
+        uint32_t time = i < nlights ? mask >> (nlights - i) : mask << (i - nlights);
         dispTimes(time & sec_mask,
                   (time >> NSECS) & min_mask,
                   (time >> (NSECS + NMINS)) & hour_mask);
