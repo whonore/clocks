@@ -1,6 +1,7 @@
-Require Import Arith.
-Require Import Lia.
-Require Import ZArith.
+From Coq Require Import
+  Arith
+  Lia
+  ZArith.
 
 Open Scope Z.
 
@@ -21,9 +22,9 @@ Proof.
   replace (n - m) with ((n mod q - m mod q) + (n / q - m / q) * q) by lia.
   rewrite Z.div_add by lia.
   enough (0 <= -((n mod q - m mod q) / q) <= 1) by lia.
-  assert (m mod q <= n mod q \/ n mod q < m mod q) as [|] by lia.
+  destruct (Z.le_gt_cases (m mod q) (n mod q)).
   { rewrite Z.div_small; lia. }
-  assert ((n mod q - m mod q) mod q = 0 \/ (n mod q - m mod q) mod q <> 0) as [|] by lia.
+  destruct (Z.eq_dec ((n mod q - m mod q) mod q) 0).
   { rewrite <- Z.div_opp_l_z, Z.div_small; lia. }
   enough (-1 <= -((n mod q - m mod q) / q) - 1 <= 0) by lia.
   rewrite <- Z.div_opp_l_nz, Z.div_small; lia.
@@ -36,7 +37,7 @@ Proof.
   intros * Hmn Hq ?.
   pose proof (Z.div_le_mono m n q ltac:(lia) ltac:(lia)).
   split; [lia |].
-  apply Z.div_lt_upper_bound in Hq as ?; try lia.
+  apply Z.div_lt_upper_bound in Hq as ?; [| lia].
   pose proof (div_sub_distr_bound m n q); lia.
 Qed.
 
@@ -47,6 +48,6 @@ Proof.
   unfold oversub; intros * Hmn Hb.
   rewrite !Z.mod_eq by lia.
   assert (n / b = m / b \/ n / b = m / b + 1) as [Heq | Heq]
-    by (pose proof (div_diff_bound m n 1 b); lia);
-    rewrite Heq; destruct (_ <? _) eqn:Hlt; rewrite ?Z.ltb_lt, ?Z.ltb_nlt in Hlt; lia.
+    by (pose proof (div_diff_bound m n 1 b); lia).
+  all: rewrite Heq; destruct (_ <? _) eqn:Hlt; rewrite ?Z.ltb_lt, ?Z.ltb_nlt in Hlt; lia.
 Qed.
