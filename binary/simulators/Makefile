@@ -11,11 +11,14 @@ endif
 
 all: clock
 
-clock: clock.cpp arduino.cpp arduino.h
+clock: clock.cpp arduino.cpp arduino.h clock.h config.h util.h
 	g++ $(CCOPTS) -o $@ $< arduino.cpp $(CCLINK)
 
 clock.cpp: ../clock.ino ino2c.py
 	./ino2c.py ../clock.ino $@
+
+%.h: ../%.h
+	ln -s $< $@
 
 lintpy: $(wildcard *.py)
 	python -m black .

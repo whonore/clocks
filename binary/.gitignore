@@ -1,2 +1,6 @@
-clock
-clock.cpp
+simulators/
+!simulators/Makefile
+!simulators/arduino.cpp
+!simulators/arduino.h
+!simulators/ino2c.py
+!simulators/clock.py
