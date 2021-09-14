@@ -126,11 +126,11 @@ static bool pressed(pin_t button, byte *old, byte active) {
 // Convert `ticks` to seconds, minutes, and hours and add them to `time`.
 static void ticksToTime(struct time_t *time, ticks_t ticks) {
     uint32_t sec = time->secs + (ticks / TICKS_PER_SEC);
-    uint32_t min = time->mins + (sec / 60);
-    uint32_t hour = time->hours + (min / 60);
-    time->hours = hour % 24;
-    time->mins = min % 60;
-    time->secs = sec % 60;
+    uint32_t min = time->mins + (sec / SEC_MAX);
+    uint32_t hour = time->hours + (min / MIN_MAX);
+    time->hours = hour % HOUR_MAX;
+    time->mins = min % MIN_MAX;
+    time->secs = sec % SEC_MAX;
 }
 
 // Update the ring segment LEDs.

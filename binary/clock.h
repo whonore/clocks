@@ -1,6 +1,9 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
+// Use 24-hour time. Must come before util.h.
+#define HOUR24 1
+
 #include "util.h"
 #include "config.h"
 
@@ -29,8 +32,8 @@ typedef uint64_t ticks_t;
 #define TICKS_MAX ((ticks_t) ((uint32_t) (-1)))
 #define CLOCK_DRIFT_TICKS (CLOCK_DRIFT_PER_MIL / (1000000 / TICK_UNIT))
 #define TICKS_PER_SEC ((ticks_t) TICK_UNIT + CLOCK_DRIFT_TICKS)
-#define TICKS_PER_DAY ((ticks_t) TICKS_PER_SEC * 60 * 60 * 24)
-static_assert(TICKS_PER_DAY / TICKS_PER_SEC == (ticks_t) 60 * 60 * 24,
+#define TICKS_PER_DAY ((ticks_t) TICKS_PER_SEC * SEC_MAX * MIN_MAX * HOUR_MAX)
+static_assert(TICKS_PER_DAY / TICKS_PER_SEC == (ticks_t) SEC_MAX * MIN_MAX * HOUR_MAX,
               "Ticks overflowed");
 
 struct time_t {
