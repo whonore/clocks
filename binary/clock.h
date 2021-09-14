@@ -1,10 +1,8 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
+#include "util.h"
 #include "config.h"
-
-// Util
-#define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
 #if NEOPIXEL
 #include <Adafruit_NeoPixel.h>
@@ -46,7 +44,6 @@ struct time_t {
 #define NHOURS 5
 
 // LEDs
-typedef byte pin_t;
 typedef byte color_t[3];
 
 struct ring_t {
