@@ -6,7 +6,7 @@ from typing import List, Tuple
 
 
 def find_decls(ino: str) -> Tuple[List[str], List[str]]:
-    with open(ino) as f:
+    with open(ino, encoding="utf8") as f:
         txt = f.read()
         incls = re.findall(r"^#include.*$", txt, re.MULTILINE)
         decls = re.findall(
@@ -21,9 +21,9 @@ def add_header(ino: str, c: str, incls: List[str], decls: List[str]) -> None:
         + [" ".join(incl.split()) for incl in incls]
         + [" ".join(decl.rstrip("{;").split()) + ";" for decl in decls]
     )
-    with open(ino, "r") as f:
+    with open(ino, "r", encoding="utf8") as f:
         txt = f.read()
-    with open(c, "w") as f:
+    with open(c, "w", encoding="utf8") as f:
         f.write(header + "\n\n" + txt)
 
 
@@ -40,5 +40,5 @@ if __name__ == "__main__":
     try:
         incls, decls = find_decls(ino)
         add_header(ino, c, incls, decls)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         sys.exit(e)
