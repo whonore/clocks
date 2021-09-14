@@ -1,4 +1,4 @@
-#include "binclock.h"
+#include "clock.h"
 
 // The state of each ring.
 #if NEOPIXEL

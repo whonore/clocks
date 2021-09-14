@@ -1,5 +1,5 @@
-#ifndef BINCLOCK_H
-#define BINCLOCK_H
+#ifndef CLOCK_H
+#define CLOCK_H
 
 #include "config.h"
 
@@ -66,4 +66,4 @@ struct ring_t {
 #define RING(ps) { .pins = (ps), .nsegs = ARRAY_LEN(ps) }
 #endif
 
-#endif /* BINCLOCK_H */
+#endif /* CLOCK_H */

@@ -9,13 +9,13 @@ endif
 
 .PHONY: all lintpy clean
 
-all: binclock
+all: clock
 
-binclock: binclock.cpp arduino.cpp arduino.h
+clock: clock.cpp arduino.cpp arduino.h
 	g++ $(CCOPTS) -o $@ $< arduino.cpp $(CCLINK)
 
-binclock.cpp: ../binclock.ino ino2c.py
-	./ino2c.py ../binclock.ino $@
+clock.cpp: ../clock.ino ino2c.py
+	./ino2c.py ../clock.ino $@
 
 lintpy: $(wildcard *.py)
 	python -m black .
@@ -24,4 +24,4 @@ lintpy: $(wildcard *.py)
 	python -m flake8 --ignore=E501,W503 .
 
 clean:
-	rm -f binclock.cpp binclock
+	rm -f clock.cpp clock

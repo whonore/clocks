@@ -16,7 +16,7 @@ def interpolate(min: int, max: int, n: int) -> Sequence[int]:
     return list(range(min, max, step)) + [max]
 
 
-class BinClock(turtle.Turtle):
+class Clock(turtle.Turtle):
     refresh_ms = 500
     rings = ("hour", "min", "sec")
 
@@ -79,4 +79,4 @@ class BinClock(turtle.Turtle):
 
 
 if __name__ == "__main__":
-    BinClock().start()
+    Clock().start()
