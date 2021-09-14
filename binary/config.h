@@ -26,10 +26,10 @@
 #define CLOCK_DRIFT_PER_MIL (-1500)
 
 #if NEOPIXEL
-#define SEC_COLOR1 {0, 0, 255}
-#define SEC_COLOR2 {100, 0, 100}
-#define MIN_COLOR1 {0, 255, 0}
-#define MIN_COLOR2 {0, 100, 100}
+#define SEC_COLOR1  {0, 0, 255}
+#define SEC_COLOR2  {100, 0, 100}
+#define MIN_COLOR1  {0, 255, 0}
+#define MIN_COLOR2  {0, 100, 100}
 #define HOUR_COLOR1 {255, 0, 0}
 #define HOUR_COLOR2 {100, 100, 0}
 #endif

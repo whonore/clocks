@@ -41,8 +41,8 @@ struct time_t {
     byte hours;
 };
 
-#define NSECS 6
-#define NMINS 6
+#define NSECS  6
+#define NMINS  6
 #define NHOURS 5
 
 // LEDs
