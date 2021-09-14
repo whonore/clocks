@@ -16,8 +16,8 @@ static_assert(hours.nsegs == NHOURS, "Wrong number of hours");
 #endif
 
 // The buttons to manually increment the minute and hour.
-static const pin_t incHour = 0;
-static const pin_t incMin = 13;
+static const pin_t inc_hour = 0;
+static const pin_t inc_min = 13;
 
 // The previous voltage state read for each button.
 static byte last_hour_st = HIGH;
@@ -61,8 +61,8 @@ void setup() {
     }
 
     // Initialize the button pins.
-    pinMode(incHour, INPUT);
-    pinMode(incMin, INPUT);
+    pinMode(inc_hour, INPUT);
+    pinMode(inc_min, INPUT);
 
 #if STARTUP
     // Display the startup animation.
@@ -81,8 +81,8 @@ void loop() {
     bool at_second = (TICKS_PER_SEC <= ellapsed);
 
     // Check if either button was pressed.
-    bool hour_pressed = pressed(incHour, &last_hour_st, LOW);
-    bool min_pressed = pressed(incMin, &last_min_st, HIGH);
+    bool hour_pressed = pressed(inc_hour, &last_hour_st, LOW);
+    bool min_pressed = pressed(inc_min, &last_min_st, HIGH);
 
     // Increment the hour.
     if (hour_pressed) {
