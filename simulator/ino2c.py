@@ -10,21 +10,23 @@ def find_decls(ino: str) -> Tuple[List[str], List[str]]:
         txt = f.read()
         incls = re.findall(r"^#include.*$", txt, re.MULTILINE)
         decls = re.findall(
-            r"^(?:(?:static|struct)[^;=]+{|typedef[^;]+;)", txt, re.MULTILINE
+            r"^(?:(?:static|struct)[^;=]+?{|typedef[^;]+?;)", txt, re.MULTILINE
         )
         return incls, decls
 
 
 def add_header(ino: str, c: str, incls: List[str], decls: List[str]) -> None:
     header = "\n".join(
-        ['#include "arduino.h"', ""]
+        ['#include <arduino.h>', ""]
         + [" ".join(incl.split()) for incl in incls]
         + [" ".join(decl.rstrip("{;").split()) + ";" for decl in decls]
     )
     with open(ino, "r", encoding="utf8") as f:
         txt = f.read()
     with open(c, "w", encoding="utf8") as f:
-        f.write(header + "\n\n" + txt)
+        txt = header + "\n\n" + txt
+        txt = txt.replace('#include "', '#include "../')
+        f.write(txt)
 
 
 if __name__ == "__main__":

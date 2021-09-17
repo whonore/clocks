@@ -25,7 +25,7 @@ void Serial_::print(const char *str) {
     strncat(this->_out, str, SERIAL_OUT - len - 1);
 }
 
-void Serial_::begin(unsigned int baud) {
+void Serial_::begin(unsigned int UNUSED(baud)) {
     this->init = true;
 }
 
@@ -77,14 +77,17 @@ void digitalWrite(uint8_t pin, uint8_t val) {
     pins[pin].val = val;
 }
 
+// Program Memory
+void *memcpy_P(void *dest, const void *src, size_t n) {
+    return memcpy(dest, src, n);
+}
+
 // Reading input
 static volatile bool quit = false;
 
-static void *getkb(void *_arg) {
-    int pin;
-
+static void *getkb(void *UNUSED(_arg)) {
     while (!quit) {
-        pin = getch();
+        int pin = getch();
         switch (pin) {
             case 'q':
                 quit = true;
@@ -99,7 +102,7 @@ static void *getkb(void *_arg) {
                 time_factor = 1;
                 break;
             default:
-                if ('A' <= pin && pin <= 'A' + NPINS) {
+                if ('A' <= pin && pin < 'A' + NPINS) {
                     pin -= 'A';
                     if (pins[pin].mode == INPUT) {
                         pins[pin].val = HIGH;
@@ -124,6 +127,7 @@ static void arduino_init() {
     pins_init();
 }
 
+#if DEBUG_PINS
 static void print_pin(int i) {
     int x, y;
     int c;
@@ -170,23 +174,28 @@ static void display() {
 
     refresh();
 }
+#endif
 
 int main(int argc, char **argv) {
     time_factor = 1 < argc ? atof(argv[1]) : 1.0;
     usec_offset = _micros();
     pthread_t tid;
 
+#if DEBUG_PINS
     initscr();
     cbreak();
     noecho();
     curs_set(0);
+#endif
 
     arduino_init();
     assert(pthread_create(&tid, NULL, &getkb, NULL) == 0);
     setup();
     while (1) {
         loop();
+#if DEBUG_PINS
         display();
+#endif
         if (quit) {
             assert(pthread_join(tid, NULL) == 0);
             break;
@@ -194,6 +203,8 @@ int main(int argc, char **argv) {
         delay(100);
     }
 
+#if DEBUG_PINS
     endwin();
+#endif
     return 0;
 }

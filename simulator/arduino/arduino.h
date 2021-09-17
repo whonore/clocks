@@ -1,10 +1,16 @@
 #ifndef ARDUINO_H
-#define ARDUINO_H 1
+#define ARDUINO_H
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
+#ifndef DEBUG_PINS
+#define DEBUG_PINS 0
+#endif
+
+#define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
 
 typedef uint8_t byte;
 
@@ -26,7 +32,7 @@ typedef uint8_t byte;
 #define SERIAL_OUT 256
 class Serial_ {
     private:
-        bool init;
+        bool init = false;
     public:
         char _out[SERIAL_OUT];
         Serial_() { memset(this->_out, '\0', SERIAL_OUT); }
@@ -45,6 +51,12 @@ uint8_t digitalRead(uint8_t pin);
 void digitalWrite(uint8_t pin, uint8_t val);
 
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
+#define bitSet(value, bit) ((value) |= (1UL << (bit)))
+
+// Program Memory
+#define PROGMEM
+
+void *memcpy_P(void *dest, const void *src, size_t n);
 
 // Initialization
 void setup();

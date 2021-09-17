@@ -4,3 +4,9 @@
 *.vo
 *.glob
 *.aux
+**/simulator/*
+!**/simulator/arduino
+!**/simulator/ino2c.py
+!**/simulator/Makefile
+!**/simulator/Makefile.inc
+!binary/simulator/clock.py
