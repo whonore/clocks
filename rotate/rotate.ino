@@ -1,6 +1,5 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1351.h>
-#include <SPI.h>
 
 #include "clock.h"
 #include "font.h"
@@ -26,14 +25,23 @@ void setup(void) {
     Serial.begin(9600);
     screen.begin();
     screen.setRotation(3);
+
+    screen.fillScreen(BLACK);
 }
 
 void loop() {
     draw_time(sec_bitmap, secs, SEC_MAX);
-    screen.drawBitmap(0, 0, sec_bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, BLACK);
+
+    // TODO: find the bounding box of each digit and fillRect just that area
+    screen.fillScreen(BLACK);
+    screen.drawBitmap(0, 0, sec_bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
+
+    // TODO: temporary. Mark the center of the screen
+    screen.drawPixel(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0xF800);
+
     secs = (secs + 1) % SEC_MAX;
 
-    delay(1000);
+    delay(500);
 }
 
 // Set the bits in `bitmap` corresponding to the digits in `val`.
@@ -63,11 +71,9 @@ static void draw_digit(byte *bitmap, byte digit, bool left, double angle) {
 
         // Translate the point halfway down the screen and DIGIT_GAP / 2 from
         // the screen center.
-        byte x_off =
-            // Shift the right edge DIGIT_GAP / 2 pixels from the center.
-            ((SCREEN_WIDTH / 2) - (DIGIT_GAP / 2) - IMG_WIDTH)
-            // Move to the left or right half of the screen.
-            + (left ? 0 : SCREEN_WIDTH / 2);
+        byte x_off = left
+            ? (SCREEN_WIDTH / 2) - IMG_WIDTH - (DIGIT_GAP / 2)
+            : (SCREEN_WIDTH / 2) + (DIGIT_GAP / 2);
         byte y_off = (SCREEN_HEIGHT / 2) - (IMG_HEIGHT / 2);
         pt[0] += x_off;
         pt[1] += y_off;

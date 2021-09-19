@@ -8,7 +8,7 @@
 
 // How large to draw each pixel.
 #ifndef SCALE
-#define SCALE 1
+#define SCALE 3
 #endif
 
 // The space between digits in pixels.
