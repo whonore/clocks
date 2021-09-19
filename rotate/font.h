@@ -20,7 +20,7 @@
 /* #include FONT(8) */
 /* #include FONT(9) */
 
-const Point *const font[] = {pts_0, pts_1};
-const size_t font_len[] = {pts_0_len, pts_1_len};
+const Point *const font[] = {pts_0, pts_1, pts_2};
+const size_t font_len[] = {pts_0_len, pts_1_len, pts_2_len};
 
 #endif /* FONT_H */

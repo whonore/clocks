@@ -17,18 +17,10 @@
 const uint16_t BLACK = 0x0000;
 const uint16_t WHITE = 0xFFFF;
 
-const uint8_t STEPS_PER_CIRCLE = 60;
-const uint8_t STEPS_PER_QUADRANT = STEPS_PER_CIRCLE  / 4;
-const double ANGLE_PER_STEP = -((2 * M_PI) / STEPS_PER_CIRCLE);
-
-#define STEPS_OF(val, max) ((val * STEPS_PER_CIRCLE) / max)
-#define ANGLE_OF(val, max) (STEPS_OF(val, max) * ANGLE_PER_STEP)
-
-struct time_t {
-    byte secs;
-    byte mins;
-    byte hours;
-};
+// Compute the angle (in radians) at which to display `val` by computing what
+// percent of a complete revolution it is (relative to `max`).
+// NOTE: A positive angle corresponds to a counterclockwise rotation.
+#define ANGLE_OF(val, max) ((val * 2 * M_PI) / max)
 
 // [x, y]
 typedef byte Point[2];

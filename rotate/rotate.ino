@@ -17,7 +17,7 @@ static const pin_t cs = 5;
 static const pin_t rst = 6;
 Adafruit_SSD1351 screen(SCREEN_WIDTH, SCREEN_HEIGHT, cs, dc, mosi, sclk, rst);
 
-static const uint16_t BITMAP_SZ = (RESOLUTION * RESOLUTION) / 8;
+static const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 static byte sec_bitmap[BITMAP_SZ];
 
 static byte secs = 0;
@@ -38,8 +38,8 @@ void loop() {
 
 // Set the bits in `bitmap` corresponding to the digits in `val`.
 static void draw_time(byte *bitmap, byte val, byte max) {
-    byte hi = val % 10;
-    byte lo = val / 10;
+    byte hi = val / 10;
+    byte lo = val % 10;
     double angle = ANGLE_OF(val, max);
     memset(bitmap, 0, BITMAP_SZ);
     draw_digit(bitmap, hi, true, angle);
@@ -52,30 +52,48 @@ static void draw_digit(byte *bitmap, byte digit, bool left, double angle) {
     Point pt;
 
     for (size_t i = 0; i < font_len[digit]; i++) {
-        // Load a point.
+        // Load the next point from the font.
+        // NOTE: Coordinates are relative to the top left of the image, positive y
+        // is down on the screen.
         memcpy_P(pt, font[digit][i], sizeof(Point));
 
-        // Scale it.
+        // Scale the point.
         pt[0] *= SCALE;
         pt[1] *= SCALE;
 
-        // Translate it relative to the screen center.
+        // Translate the point halfway down the screen and DIGIT_GAP / 2 from
+        // the screen center.
         byte x_off =
             // Shift the right edge DIGIT_GAP / 2 pixels from the center.
-            ((SCREEN_WIDTH / 2) - IMG_WIDTH + (DIGIT_GAP / 2))
+            ((SCREEN_WIDTH / 2) - (DIGIT_GAP / 2) - IMG_WIDTH)
             // Move to the left or right half of the screen.
             + (left ? 0 : SCREEN_WIDTH / 2);
-        byte y_off = SCREEN_HEIGHT / 2;
+        byte y_off = (SCREEN_HEIGHT / 2) - (IMG_HEIGHT / 2);
         pt[0] += x_off;
         pt[1] += y_off;
 
-        // Rotate it around the screen center.
-        double x = pt[0] * cos(angle) - pt[1] * sin(angle);
-        double y = pt[0] * sin(angle) + pt[1] * cos(angle);
-        pt[0] = round(x);
-        pt[1] = round(y);
+        // Adjust the coordinates relative to the screen origin ((0, 0) is the
+        // screen center, positive y is up on the screen).
+        double x = pt[0] - (SCREEN_WIDTH / 2);
+        double y = (SCREEN_HEIGHT / 2) - pt[1];
 
-        // Draw SCALE pixels per point in each axis.
+        // Rotate the point around the screen center.
+        double x_rot = x * cos(angle) - y * sin(angle);
+        double y_rot = x * sin(angle) + y * cos(angle);
+
+        // Reset the coordinate reference frame ((0, 0) is the top left of the
+        // screen, positive y is down on the screen).
+        x_rot += (SCREEN_WIDTH / 2);
+        y_rot = (SCREEN_HEIGHT / 2) - y_rot;
+
+        // Round to the nearest integer point and skip if it is out of bounds.
+        if (round(x_rot) < 0 || round(y_rot) < 0) {
+            continue;
+        }
+        pt[0] = round(x_rot);
+        pt[1] = round(y_rot);
+
+        // Draw `SCALE` pixels per point in each axis.
         for (byte x_off = 0; x_off < SCALE; x_off++) {
             pt[0] += x_off;
             for (byte y_off = 0; y_off < SCALE; y_off++) {
