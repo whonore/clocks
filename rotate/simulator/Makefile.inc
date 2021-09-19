@@ -1,0 +1,4 @@
+CCOPTS += -DDEBUG_PINS=0
+ifneq ($(SCALE),)
+CCOPTS += -DSCALE=$(SCALE)
+endif
