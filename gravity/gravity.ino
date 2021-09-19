@@ -1,47 +1,43 @@
-#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1351.h>
+#include <DS3231.h>
 
 #include "clock.h"
 #include "font.h"
 
-static const uint8_t SCREEN_WIDTH = 128;
-static const uint8_t SCREEN_HEIGHT = 128;
-static const uint8_t IMG_WIDTH = RESOLUTION * SCALE;
-static const uint8_t IMG_HEIGHT = RESOLUTION * SCALE;
+//                                 CS  DC  MOSI SCLK RST
+static screen_t scrn_min  = SCREEN(4,  5,  2,   3,   6);
+static screen_t scrn_hour = SCREEN(16, 15, 18,  17,  14);
 
-static const pin_t sclk = 2;
-static const pin_t mosi = 3;
-static const pin_t dc = 4;
-static const pin_t cs = 5;
-static const pin_t rst = 6;
-Adafruit_SSD1351 screen(SCREEN_WIDTH, SCREEN_HEIGHT, cs, dc, mosi, sclk, rst);
-
-static const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
-static byte sec_bitmap[BITMAP_SZ];
-
-static byte secs = 0;
+static DS3231 rtc(SDA, SCL);
 
 void setup(void) {
     Serial.begin(9600);
-    screen.begin();
-    screen.setRotation(3);
 
-    screen.fillScreen(BLACK);
+    screen_t *SCREENS[] = {&scrn_min, &scrn_hour};
+    for (byte i = 0; i < ARRAY_LEN(SCREENS); i++) {
+        SCREENS[i]->screen.begin();
+        SCREENS[i]->screen.setRotation(3);
+        SCREENS[i]->screen.fillScreen(BLACK);
+    }
+
+    rtc.begin();
 }
 
 void loop() {
-    draw_time(sec_bitmap, secs, SEC_MAX);
+    Time time = rtc.getTime();
+    set_time(&scrn_min, time.min, MIN_MAX);
+    set_time(&scrn_hour, time.hour % HOUR_MAX, HOUR_MAX);
+}
 
-    // TODO: find the bounding box of each digit and fillRect just that area
-    screen.fillScreen(BLACK);
-    screen.drawBitmap(0, 0, sec_bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
-
-    // TODO: temporary. Mark the center of the screen
-    screen.drawPixel(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0xF800);
-
-    secs = (secs + 1) % SEC_MAX;
-
-    delay(500);
+// Check if `time` is different than what `scrn` is currently displaying
+// and, if so, update the display.
+static void set_time(struct screen_t *scrn, byte time, byte max) {
+    if (scrn->time != time) {
+        scrn->time = time;
+        draw_time(scrn->bitmap, time, max);
+        clear_screen(scrn);
+        scrn->screen.drawBitmap(0, 0, scrn->bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
+    }
 }
 
 // Set the bits in `bitmap` corresponding to the digits in `val`.
@@ -50,6 +46,7 @@ static void draw_time(byte *bitmap, byte val, byte max) {
     byte lo = val % 10;
     double angle = ANGLE_OF(val, max);
     memset(bitmap, 0, BITMAP_SZ);
+    //hi = lo = 0; // TODO: temporary
     draw_digit(bitmap, hi, true, angle);
     draw_digit(bitmap, lo, false, angle);
 }
@@ -120,4 +117,10 @@ static void draw_point(byte *bitmap, Point pt) {
         int bit = 7 - (xy % 8);
         bitSet(bitmap[idx], bit);
     }
+}
+
+// Clear `scrn`'s display.
+static void clear_screen(struct screen_t *scrn) {
+    // TODO: find the bounding box of each digit and fillRect just that area
+    scrn->screen.fillScreen(BLACK);
 }
