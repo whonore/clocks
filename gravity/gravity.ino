@@ -29,8 +29,8 @@ void loop() {
     set_time(&scrn_hour, time.hour % HOUR_MAX, HOUR_MAX);
 }
 
-// Check if `time` is different than what `scrn` is currently displaying
-// and, if so, update the display.
+// Check if `time` is different than what `scrn` is currently displaying and,
+// if so, update the display.
 static void set_time(struct screen_t *scrn, byte time, byte max) {
     if (scrn->time != time) {
         scrn->time = time;
@@ -46,7 +46,7 @@ static void draw_time(byte *bitmap, byte val, byte max) {
     byte lo = val % 10;
     double angle = ANGLE_OF(val, max);
     memset(bitmap, 0, BITMAP_SZ);
-    //hi = lo = 0; // TODO: temporary
+
     draw_digit(bitmap, hi, true, angle);
     draw_digit(bitmap, lo, false, angle);
 }
@@ -58,8 +58,8 @@ static void draw_digit(byte *bitmap, byte digit, bool left, double angle) {
 
     for (size_t i = 0; i < font_len[digit]; i++) {
         // Load the next point from the font.
-        // NOTE: Coordinates are relative to the top left of the image, positive y
-        // is down on the screen.
+        // NOTE: Coordinates are relative to the top left of the image,
+        // positive y is down on the screen.
         memcpy_P(pt, font[digit][i], sizeof(Point));
 
         // Scale the point.
