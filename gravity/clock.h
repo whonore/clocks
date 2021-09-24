@@ -25,6 +25,9 @@ const uint8_t IMG_WIDTH = RESOLUTION * SCALE;
 const uint8_t IMG_HEIGHT = RESOLUTION * SCALE;
 const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 
+static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
+              "SCREEN_WIDTH * SCREEN_HEIGHT must be a multiple of 8");
+
 // Compute the angle (in radians) at which to display `val` by computing what
 // percent of a complete revolution it is (relative to `max`).
 // NOTE: A positive angle corresponds to a counterclockwise rotation.
