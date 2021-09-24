@@ -89,6 +89,35 @@ class Adafruit_SSD1351 {
             }
             endWrite();
         }
+
+        void drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w,
+                        int16_t h, uint16_t color) {
+            int16_t byteWidth = (w + 7) / 8;
+            uint8_t byte = 0;
+
+            startWrite();
+            for (int16_t j = 0; j < h; j++, y++) {
+                for (int16_t i = 0; i < w; i++) {
+                    if (i & 7) {
+                        byte <<= 1;
+                    } else {
+                        byte = bitmap[j * byteWidth + i / 8];
+                    }
+                    if (byte & 0x80) {
+                        writePixel(x + i, y, color);
+                    }
+                }
+            }
+            endWrite();
+        }
+
+        void fillScreen(uint16_t color) {
+            for (int16_t x = 0; x < this->width; x++) {
+                for (int16_t y = 0; y < this->height; y++) {
+                    writePixel(x, y, color);
+                }
+            }
+        }
 };
 
 #endif /* ADAFRUIT_SSD1351_H */

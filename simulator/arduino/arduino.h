@@ -26,6 +26,8 @@ typedef uint8_t byte;
 #define A3 17
 #define A4 18
 #define A5 19
+#define SDA 18
+#define SCL 19
 #define NPINS 20
 
 // Serial
