@@ -34,8 +34,8 @@ void loop() {
 static void set_time(struct screen_t *scrn, uint8_t time, uint8_t max) {
     if (scrn->time != time) {
         scrn->time = time;
-        draw_time(scrn->bitmap, time, max);
         clear_screen(scrn);
+        draw_time(scrn->bitmap, time, max);
         scrn->screen.drawBitmap(0, 0, scrn->bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
     }
 }
@@ -112,15 +112,44 @@ static void draw_digit(uint8_t *bitmap, uint8_t digit, bool left, double angle) 
 // Set the bit in `bitmap` corresponding to `pt`.
 static void draw_point(uint8_t *bitmap, Point pt) {
     if (pt[0] < SCREEN_WIDTH && pt[1] < SCREEN_WIDTH) {
-        uint16_t xy = pt[1] * SCREEN_WIDTH + pt[0];
-        uint16_t idx = xy / 8;
-        uint8_t bit = 7 - (xy % 8);
+        uint16_t idx;
+        uint8_t bit;
+        xy2bit(pt[0], pt[1], idx, bit);
         bitSet(bitmap[idx], bit);
     }
 }
 
 // Clear `scrn`'s display.
 static void clear_screen(struct screen_t *scrn) {
-    // TODO: find the bounding box of each digit and fillRect just that area
-    scrn->screen.fillScreen(BLACK);
+    uint8_t x, y, width, height;
+    find_bounding(scrn->bitmap, &x, &y, &width, &height);
+    scrn->screen.fillRect(x, y, width, height, BLACK);
+}
+
+// Find the minimum bounding box for `bitmap`.
+static void find_bounding(const uint8_t *bitmap, uint8_t *x, uint8_t *y,
+                          uint8_t *width, uint8_t *height) {
+    uint8_t min_x = 0;
+    uint8_t min_y = 0;
+    uint8_t max_x = 255;
+    uint8_t max_y = 255;
+
+    for (uint16_t idx = 0; idx < BITMAP_SZ; idx++) {
+        for (int8_t bit = 7; bit >= 0; bit--) {
+            if (bitRead(bitmap[idx], bit)) {
+                uint8_t x = 0, y = 0;
+                bit2xy(bit, idx, x, y);
+                if (x < min_x) { min_x = x; }
+                if (y < min_y) { min_y = y; }
+                if (x > max_x) { max_x = x; }
+                if (y > max_y) { max_y = y; }
+            }
+        }
+    }
+
+    *x = min_x;
+    *x = min_x;
+    *y = min_y;
+    *width = max_x - min_x;
+    *height = max_y - min_y;
 }

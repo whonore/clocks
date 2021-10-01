@@ -30,6 +30,28 @@ const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 // NOTE: A positive angle corresponds to a counterclockwise rotation.
 #define ANGLE_OF(val, max) ((val * 2 * M_PI) / max)
 
+// Convert between (x, y) coordinates and bitmap (idx, bit) pairs.
+#define _xy2idx(x, y) (y * SCREEN_WIDTH + x)
+#define xy2bit(x, y, idx, bit) \
+    (idx = _xy2idx(x, y) / 8, bit = 7 - (_xy2idx(x, y) % 8))
+#define _bit2idx(bit, idx) (idx * 8 + (7 - bit))
+#define bit2xy(idx, bit, x, y) \
+    (x = _bit2idx(bit, idx) % SCREEN_WIDTH, y = _bit2idx(bit, idx) / SCREEN_WIDTH)
+
+// Sanity check. Not supported by C++11.
+#if __cpp_constexpr >= 201304
+static constexpr bool _test_xy_bit() {
+    uint8_t x = 0;
+    uint8_t y = 0;
+    uint16_t idx = 0;
+    uint8_t bit = 0;
+    xy2bit(SCREEN_CENTER_X, SCREEN_CENTER_Y, idx, bit);
+    bit2xy(idx, bit, x, y);
+    return (x == SCREEN_CENTER_X) && (y == SCREEN_CENTER_Y);
+}
+static_assert(_test_xy_bit());
+#endif
+
 // [x, y]
 typedef uint8_t Point[2];
 
