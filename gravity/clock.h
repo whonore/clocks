@@ -31,11 +31,11 @@ const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 #define ANGLE_OF(val, max) ((val * 2 * M_PI) / max)
 
 // [x, y]
-typedef byte Point[2];
+typedef uint8_t Point[2];
 
 struct screen_t {
     Adafruit_SSD1351 screen;
-    byte bitmap[BITMAP_SZ];
+    uint8_t bitmap[BITMAP_SZ];
     int8_t time;
 };
 

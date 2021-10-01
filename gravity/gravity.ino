@@ -14,7 +14,7 @@ void setup(void) {
     Serial.begin(9600);
 
     screen_t *SCREENS[] = {&scrn_min, &scrn_hour};
-    for (byte i = 0; i < ARRAY_LEN(SCREENS); i++) {
+    for (uint8_t i = 0; i < ARRAY_LEN(SCREENS); i++) {
         SCREENS[i]->screen.begin();
         SCREENS[i]->screen.setRotation(ROTATE);
         SCREENS[i]->screen.fillScreen(BLACK);
@@ -31,7 +31,7 @@ void loop() {
 
 // Check if `time` is different than what `scrn` is currently displaying and,
 // if so, update the display.
-static void set_time(struct screen_t *scrn, byte time, byte max) {
+static void set_time(struct screen_t *scrn, uint8_t time, uint8_t max) {
     if (scrn->time != time) {
         scrn->time = time;
         draw_time(scrn->bitmap, time, max);
@@ -41,19 +41,19 @@ static void set_time(struct screen_t *scrn, byte time, byte max) {
 }
 
 // Set the bits in `bitmap` corresponding to the digits in `val`.
-static void draw_time(byte *bitmap, byte val, byte max) {
-    byte hi = val / 10;
-    byte lo = val % 10;
+static void draw_time(uint8_t *bitmap, uint8_t val, uint8_t max) {
+    uint8_t hi = val / 10;
+    uint8_t lo = val % 10;
     double angle = ANGLE_OF(val, max);
-    memset(bitmap, 0, BITMAP_SZ);
 
+    memset(bitmap, 0, BITMAP_SZ);
     draw_digit(bitmap, hi, true, angle);
     draw_digit(bitmap, lo, false, angle);
 }
 
 // Set the bits in `bitmap` corresponding to `digit` rotated by `angle` in
 // either the left or right half of the screen.
-static void draw_digit(byte *bitmap, byte digit, bool left, double angle) {
+static void draw_digit(uint8_t *bitmap, uint8_t digit, bool left, double angle) {
     Point pt;
 
     for (size_t i = 0; i < font_len[digit]; i++) {
@@ -68,10 +68,10 @@ static void draw_digit(byte *bitmap, byte digit, bool left, double angle) {
 
         // Translate the point halfway down the screen and DIGIT_GAP / 2 from
         // the screen center.
-        byte x_off = left
+        uint8_t x_off = left
             ? SCREEN_CENTER_X - IMG_WIDTH - (DIGIT_GAP / 2)
             : SCREEN_CENTER_X + (DIGIT_GAP / 2);
-        byte y_off = SCREEN_CENTER_Y - (IMG_HEIGHT / 2);
+        uint8_t y_off = SCREEN_CENTER_Y - (IMG_HEIGHT / 2);
         pt[0] += x_off;
         pt[1] += y_off;
 
@@ -97,9 +97,9 @@ static void draw_digit(byte *bitmap, byte digit, bool left, double angle) {
         pt[1] = round(y_rot);
 
         // Draw `SCALE` pixels per point in each axis.
-        for (byte x_off = 0; x_off < SCALE; x_off++) {
+        for (uint8_t x_off = 0; x_off < SCALE; x_off++) {
             pt[0] += x_off;
-            for (byte y_off = 0; y_off < SCALE; y_off++) {
+            for (uint8_t y_off = 0; y_off < SCALE; y_off++) {
                 pt[1] += y_off;
                 draw_point(bitmap, pt);
                 pt[1] -= y_off;
@@ -110,11 +110,11 @@ static void draw_digit(byte *bitmap, byte digit, bool left, double angle) {
 }
 
 // Set the bit in `bitmap` corresponding to `pt`.
-static void draw_point(byte *bitmap, Point pt) {
+static void draw_point(uint8_t *bitmap, Point pt) {
     if (pt[0] < SCREEN_WIDTH && pt[1] < SCREEN_WIDTH) {
-        int xy = pt[1] * SCREEN_WIDTH + pt[0];
-        int idx = xy / 8;
-        int bit = 7 - (xy % 8);
+        uint16_t xy = pt[1] * SCREEN_WIDTH + pt[0];
+        uint16_t idx = xy / 8;
+        uint8_t bit = 7 - (xy % 8);
         bitSet(bitmap[idx], bit);
     }
 }
