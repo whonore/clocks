@@ -4,18 +4,24 @@
 #include <arduino.h>
 #include <ncurses.h>
 
+static unsigned int nwindows = 0;
+
 class Adafruit_SSD1351 {
     private:
+        WINDOW *win;
         uint16_t width;
         uint16_t height;
         uint8_t rotation = 0;
 
         void startWrite() {}
-        void endWrite() { refresh(); }
+        void endWrite() {
+            box(this->win, 0, 0);
+            wrefresh(this->win);
+        }
 
         void writePixel(int16_t x, int16_t y, uint16_t color) {
             int width, height;
-            getmaxyx(stdscr, height, width);
+            getmaxyx(this->win, height, width);
 
             if ((x < 0) || (y < 0) || (x >= this->width) || (y >= this->height)
                 || (x >= width) || (y >= height)) {
@@ -40,7 +46,7 @@ class Adafruit_SSD1351 {
                     break;
             }
 
-            mvaddch(y, x, color != 0 ? 'X' : ' ');
+            mvwaddch(this->win, y, x, color != 0 ? 'X' : ' ');
         }
     public:
         Adafruit_SSD1351(uint16_t width, uint16_t height,
@@ -51,11 +57,23 @@ class Adafruit_SSD1351 {
             this->height = height;
         }
 
+        ~Adafruit_SSD1351() {
+            nwindows--;
+            delwin(this->win);
+            if (nwindows == 0) {
+                endwin();
+            }
+        }
+
         void begin() {
-            initscr();
-            cbreak();
-            noecho();
-            curs_set(0);
+            if (nwindows == 0) {
+                initscr();
+                cbreak();
+                noecho();
+                curs_set(0);
+            }
+            this->win = newwin(this->height, this->width, 0, this->width * nwindows);
+            nwindows++;
         }
 
         void setRotation(uint8_t x) {
@@ -63,7 +81,7 @@ class Adafruit_SSD1351 {
             uint16_t w = this->width;
             uint16_t h = this->height;
             switch (rotation) {
-                case 2:
+                case 1:
                 case 3:
                     this->width = h;
                     this->height = w;

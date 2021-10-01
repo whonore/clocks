@@ -16,7 +16,7 @@ void setup(void) {
     screen_t *SCREENS[] = {&scrn_min, &scrn_hour};
     for (byte i = 0; i < ARRAY_LEN(SCREENS); i++) {
         SCREENS[i]->screen.begin();
-        SCREENS[i]->screen.setRotation(3);
+        SCREENS[i]->screen.setRotation(ROTATE);
         SCREENS[i]->screen.fillScreen(BLACK);
     }
 
