@@ -69,16 +69,16 @@ static void draw_digit(byte *bitmap, byte digit, bool left, double angle) {
         // Translate the point halfway down the screen and DIGIT_GAP / 2 from
         // the screen center.
         byte x_off = left
-            ? (SCREEN_WIDTH / 2) - IMG_WIDTH - (DIGIT_GAP / 2)
-            : (SCREEN_WIDTH / 2) + (DIGIT_GAP / 2);
-        byte y_off = (SCREEN_HEIGHT / 2) - (IMG_HEIGHT / 2);
+            ? SCREEN_CENTER_X - IMG_WIDTH - (DIGIT_GAP / 2)
+            : SCREEN_CENTER_X + (DIGIT_GAP / 2);
+        byte y_off = SCREEN_CENTER_Y - (IMG_HEIGHT / 2);
         pt[0] += x_off;
         pt[1] += y_off;
 
         // Adjust the coordinates relative to the screen origin ((0, 0) is the
         // screen center, positive y is up on the screen).
-        double x = pt[0] - (SCREEN_WIDTH / 2);
-        double y = (SCREEN_HEIGHT / 2) - pt[1];
+        double x = pt[0] - SCREEN_CENTER_X;
+        double y = SCREEN_CENTER_Y - pt[1];
 
         // Rotate the point around the screen center.
         double x_rot = x * cos(angle) - y * sin(angle);
@@ -86,8 +86,8 @@ static void draw_digit(byte *bitmap, byte digit, bool left, double angle) {
 
         // Reset the coordinate reference frame ((0, 0) is the top left of the
         // screen, positive y is down on the screen).
-        x_rot += (SCREEN_WIDTH / 2);
-        y_rot = (SCREEN_HEIGHT / 2) - y_rot;
+        x_rot += SCREEN_CENTER_X;
+        y_rot = SCREEN_CENTER_Y - y_rot;
 
         // Round to the nearest integer point and skip if it is out of bounds.
         if (round(x_rot) < 0 || round(y_rot) < 0) {

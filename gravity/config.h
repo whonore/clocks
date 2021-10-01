@@ -8,14 +8,22 @@
 
 // The screen dimensions in pixels.
 #ifndef SCREEN_WIDTH
-#define SCREEN_WIDTH 128;
+#define SCREEN_WIDTH 128
 #endif
 #ifndef SCREEN_HEIGHT
-#define SCREEN_HEIGHT 128;
+#define SCREEN_HEIGHT 128
 #endif
 
 static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
               "SCREEN_WIDTH * SCREEN_HEIGHT must be a multiple of 8");
+
+// How many pixels to shift the screen center.
+#ifndef SCREEN_OFF_X
+#define SCREEN_OFF_X 0
+#endif
+#ifndef SCREEN_OFF_Y
+#define SCREEN_OFF_Y 0
+#endif
 
 // How large to draw each pixel.
 #ifndef SCALE

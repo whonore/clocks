@@ -21,6 +21,8 @@ const uint16_t WHITE = 0xFFFF;
 
 const uint8_t IMG_WIDTH = RESOLUTION * SCALE;
 const uint8_t IMG_HEIGHT = RESOLUTION * SCALE;
+const uint8_t SCREEN_CENTER_X = (SCREEN_WIDTH / 2) + SCREEN_OFF_X;
+const uint8_t SCREEN_CENTER_Y = (SCREEN_HEIGHT / 2) + SCREEN_OFF_Y;
 const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 
 // Compute the angle (in radians) at which to display `val` by computing what
