@@ -20,11 +20,7 @@ class Adafruit_SSD1351 {
         }
 
         void writePixel(int16_t x, int16_t y, uint16_t color) {
-            int width, height;
-            getmaxyx(this->win, height, width);
-
-            if ((x < 0) || (y < 0) || (x >= this->width) || (y >= this->height)
-                || (x >= width) || (y >= height)) {
+            if ((x < 0) || (y < 0) || (x >= this->width) || (y >= this->height)) {
                 return;
             }
 
@@ -44,6 +40,12 @@ class Adafruit_SSD1351 {
                     x = y;
                     y = this->height - 1 - t;
                     break;
+            }
+
+            int width, height;
+            getmaxyx(this->win, height, width);
+            if ((x >= width) || (y >= height)) {
+                return;
             }
 
             mvwaddch(this->win, y, x, color != 0 ? 'X' : ' ');
