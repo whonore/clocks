@@ -131,12 +131,17 @@ class Adafruit_SSD1351 {
             endWrite();
         }
 
-        void fillScreen(uint16_t color) {
-            for (int16_t x = 0; x < this->width; x++) {
-                for (int16_t y = 0; y < this->height; y++) {
-                    writePixel(x, y, color);
+        void fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
+                      uint16_t color) {
+            for (int16_t r = y; r < y + h; r++) {
+                for (int16_t c = x; c < x + w; c++) {
+                    writePixel(c, r, color);
                 }
             }
+        }
+
+        void fillScreen(uint16_t color) {
+            this->fillRect(0, 0, this->width, this->height, color);
         }
 };
 

@@ -52,6 +52,9 @@ void pinMode(uint8_t pin, uint8_t mode);
 uint8_t digitalRead(uint8_t pin);
 void digitalWrite(uint8_t pin, uint8_t val);
 
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#define max(a, b) ((a) > (b) ? (a) : (b))
+
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
 #define bitSet(value, bit) ((value) |= (1UL << (bit)))
 

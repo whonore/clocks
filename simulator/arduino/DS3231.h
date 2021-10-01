@@ -3,8 +3,6 @@
 
 #include <time.h>
 
-#include <arduino.h>
-
 class Time {
     public:
         uint8_t hour;
