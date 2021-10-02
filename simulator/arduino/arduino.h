@@ -20,6 +20,8 @@ typedef uint8_t byte;
 #define INPUT 0
 #define OUTPUT 1
 #define INPUT_PULLUP 2
+#define isinput(mode) ((mode) == INPUT || (mode) == INPUT_PULLUP)
+#define isoutput(mode) ((mode) == OUTPUT)
 
 #define A0 14
 #define A1 15

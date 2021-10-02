@@ -62,18 +62,21 @@ void delay(uint32_t ms) {
 
 void pinMode(uint8_t pin, uint8_t mode) {
     pins[pin].mode = mode;
+    if (mode == INPUT_PULLUP) {
+        pins[pin].val = HIGH;
+    }
 }
 
 uint8_t digitalRead(uint8_t pin) {
     uint8_t val;
-    assert(pins[pin].mode == INPUT);
+    assert(isinput(pins[pin].mode));
     val = pins[pin].val;
     pins[pin].val = LOW;
     return val;
 }
 
 void digitalWrite(uint8_t pin, uint8_t val) {
-    assert(pins[pin].mode == OUTPUT);
+    assert(isoutput(pins[pin].mode));
     pins[pin].val = val;
 }
 
@@ -104,7 +107,7 @@ static void *getkb(void *UNUSED(_arg)) {
             default:
                 if ('A' <= pin && pin < 'A' + NPINS) {
                     pin -= 'A';
-                    if (pins[pin].mode == INPUT) {
+                    if isinput(pins[pin].mode) {
                         pins[pin].val = HIGH;
                     }
                 }
@@ -141,7 +144,7 @@ static void print_pin(int i) {
         mvprintw(y, x, "A%d", i - A0);
     }
 
-    c = (pins[i].mode == OUTPUT)
+    c = isoutput(pins[i].mode)
         ? ('v' | ((pins[i].val == HIGH) ? A_REVERSE : 0))
         : '^';
     mvaddch(y + 1, x + 1, c);
