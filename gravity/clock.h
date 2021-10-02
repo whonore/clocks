@@ -21,8 +21,10 @@ const uint16_t WHITE = 0xFFFF;
 
 const uint8_t IMG_WIDTH = RESOLUTION * SCALE;
 const uint8_t IMG_HEIGHT = RESOLUTION * SCALE;
-const uint8_t SCREEN_CENTER_X = (SCREEN_WIDTH / 2) + SCREEN_OFF_X;
-const uint8_t SCREEN_CENTER_Y = (SCREEN_HEIGHT / 2) + SCREEN_OFF_Y;
+const uint8_t SCREEN_CENTER_X =
+  (SCREEN_WIDTH / 2) + constrain(SCREEN_OFF_X, -(SCREEN_WIDTH / 2), (SCREEN_WIDTH / 2) - 1);
+const uint8_t SCREEN_CENTER_Y =
+  (SCREEN_HEIGHT / 2) + constrain(SCREEN_OFF_Y, -(SCREEN_HEIGHT / 2), (SCREEN_HEIGHT / 2) - 1);
 const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 
 // Compute the angle (in radians) at which to display `val` by computing what
@@ -49,7 +51,7 @@ static constexpr bool _test_xy_bit() {
     bit2xy(idx, bit, x, y);
     return (x == SCREEN_CENTER_X) && (y == SCREEN_CENTER_Y);
 }
-static_assert(_test_xy_bit());
+static_assert(_test_xy_bit(), "xy2bit and bit2xy are not inverses");
 #endif
 
 // [x, y]
