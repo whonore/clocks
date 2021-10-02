@@ -6,9 +6,9 @@
 
 //     CS  DC  MOSI SCLK RST MOT1 MOT2 MOT3 MOT4 STEP ZERO ZOFF
 static hand_t hand_min = \
-  HAND(4,  5,  2,   3,   6,  26,  27,  28,  29,  6,   52,  -14);
+  HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  6,   52,  -14);
 static hand_t hand_hour = \
-  HAND(16, 15, 18,  17,  14, 22,  23,  24,  25,  30,  53,  -11);
+  HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  30,  53,  -11);
 
 static DS3231 rtc(SDA, SCL);
 
@@ -77,6 +77,10 @@ static void set_time(struct hand_t *hand, uint8_t time, uint8_t max) {
 
 // Set the bits in `bitmap` corresponding to the digits in `val`.
 static void draw_time(uint8_t *bitmap, uint8_t val, uint8_t max) {
+    if (max == HOUR_MAX && val == 0) {
+        val = HOUR_MAX;
+    }
+
     uint8_t hi = val / 10;
     uint8_t lo = val % 10;
     double angle = ANGLE_OF(val, max);
