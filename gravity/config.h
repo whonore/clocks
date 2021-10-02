@@ -17,12 +17,12 @@
 static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
               "SCREEN_WIDTH * SCREEN_HEIGHT must be a multiple of 8");
 
-// How many pixels to shift the screen center.
+// How many pixels to shift the screen center (relative to ROTATE = 0).
 #ifndef SCREEN_OFF_X
-#define SCREEN_OFF_X 0
+#define SCREEN_OFF_X -4
 #endif
 #ifndef SCREEN_OFF_Y
-#define SCREEN_OFF_Y 0
+#define SCREEN_OFF_Y 11
 #endif
 
 // How large to draw each pixel.

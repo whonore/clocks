@@ -22,10 +22,22 @@ const uint16_t WHITE = 0xFFFF;
 
 const uint8_t IMG_WIDTH = RESOLUTION * SCALE;
 const uint8_t IMG_HEIGHT = RESOLUTION * SCALE;
-const uint8_t SCREEN_CENTER_X =
-  (SCREEN_WIDTH / 2) + constrain(SCREEN_OFF_X, -(SCREEN_WIDTH / 2), (SCREEN_WIDTH / 2) - 1);
-const uint8_t SCREEN_CENTER_Y =
-  (SCREEN_HEIGHT / 2) + constrain(SCREEN_OFF_Y, -(SCREEN_HEIGHT / 2), (SCREEN_HEIGHT / 2) - 1);
+
+// Adjust so the screen center is constant regardless of rotation.
+const bool SWAP_XY = ROTATE == 1 || ROTATE == 3;
+const bool FLIP_X = ROTATE == 1 || ROTATE == 2;
+const bool FLIP_Y = ROTATE == 2 || ROTATE == 3;
+const uint8_t _SCREEN_CENTER_X =
+  (SCREEN_WIDTH / 2) +
+  (FLIP_X ? -1 : 1) *
+  constrain(SCREEN_OFF_X, -(SCREEN_WIDTH / 2), (SCREEN_WIDTH / 2) - 1);
+const uint8_t _SCREEN_CENTER_Y =
+  (SCREEN_HEIGHT / 2) +
+  (FLIP_Y ? -1 : 1) *
+  constrain(SCREEN_OFF_Y, -(SCREEN_HEIGHT / 2), (SCREEN_HEIGHT / 2) - 1);
+const uint8_t SCREEN_CENTER_X = SWAP_XY ? _SCREEN_CENTER_Y : _SCREEN_CENTER_X;
+const uint8_t SCREEN_CENTER_Y = SWAP_XY ? _SCREEN_CENTER_X : _SCREEN_CENTER_Y;
+
 const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 
 const uint8_t STEPS_PER_REV = 200;
