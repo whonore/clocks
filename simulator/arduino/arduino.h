@@ -19,6 +19,7 @@ typedef uint8_t byte;
 
 #define INPUT 0
 #define OUTPUT 1
+#define INPUT_PULLUP 2
 
 #define A0 14
 #define A1 15

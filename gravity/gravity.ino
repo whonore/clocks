@@ -4,20 +4,25 @@
 #include "clock.h"
 #include "font.h"
 
-//                                 CS  DC  MOSI SCLK RST
-static screen_t scrn_min  = SCREEN(4,  5,  2,   3,   6);
-static screen_t scrn_hour = SCREEN(16, 15, 18,  17,  14);
+//     CS  DC  MOSI SCLK RST MOT1 MOT2 MOT3 MOT4 STEP ZERO ZOFF
+static hand_t hand_min = \
+  HAND(4,  5,  2,   3,   6,  26,  27,  28,  29,  6,   52,  -14);
+static hand_t hand_hour = \
+  HAND(16, 15, 18,  17,  14, 22,  23,  24,  25,  30,  53,  -11);
 
 static DS3231 rtc(SDA, SCL);
 
 void setup(void) {
     Serial.begin(9600);
 
-    screen_t *SCREENS[] = {&scrn_min, &scrn_hour};
-    for (uint8_t i = 0; i < ARRAY_LEN(SCREENS); i++) {
-        SCREENS[i]->screen.begin();
-        SCREENS[i]->screen.setRotation(ROTATE);
-        SCREENS[i]->screen.fillScreen(BLACK);
+    hand_t *HANDS[] = {&hand_min, &hand_hour};
+    for (uint8_t i = 0; i < ARRAY_LEN(HANDS); i++) {
+        HANDS[i]->screen.begin();
+        HANDS[i]->screen.setRotation(ROTATE);
+        HANDS[i]->screen.fillScreen(BLACK);
+        HANDS[i]->motor.setSpeed(10);
+        pinMode(HANDS[i]->zero_pin, INPUT_PULLUP);
+        zero_hand(HANDS[i]);
     }
 
     rtc.begin();
@@ -25,18 +30,48 @@ void setup(void) {
 
 void loop() {
     Time time = rtc.getTime();
-    set_time(&scrn_min, time.min, MIN_MAX);
-    set_time(&scrn_hour, time.hour % HOUR_MAX, HOUR_MAX);
+    set_time(&hand_min, time.min, MIN_MAX);
+    set_time(&hand_hour, time.hour % HOUR_MAX, HOUR_MAX);
 }
 
-// Check if `time` is different than what `scrn` is currently displaying and,
-// if so, update the display.
-static void set_time(struct screen_t *scrn, uint8_t time, uint8_t max) {
-    if (scrn->time != time) {
-        scrn->time = time;
-        clear_screen(scrn);
-        draw_time(scrn->bitmap, time, max);
-        scrn->screen.drawBitmap(0, 0, scrn->bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
+// Step the motor back to the zero point.
+static void zero_hand(struct hand_t *hand) {
+    // Is the switch already pressed?
+    if (digitalRead(hand->zero_pin) == LOW) {
+        hand->motor.step(40);
+    }
+
+    // Step backwards until the switch is pressed or a full revolution.
+    uint16_t steps;
+    for (steps = 0; steps < 360; steps++) {
+        if (digitalRead(hand->zero_pin) == LOW) {
+            break;
+        }
+        hand->motor.step(-1);
+        delay(50);
+    }
+
+    // Check if the switch was pressed within one revolution.
+    hand->err = (steps == 360);
+
+    // Adjust for the switch offset.
+    if (!hand->err) {
+        hand->motor.step(hand->zero_off);
+    }
+}
+
+// Check if `time` is different than what `hand` is currently displaying and,
+// if so, update the display and move the motor.
+static void set_time(struct hand_t *hand, uint8_t time, uint8_t max) {
+    if (!hand->err && hand->time != time) {
+        int8_t time_diff = time - max(hand->time, 0);
+        hand->time = time;
+
+        clear_screen(hand);
+        draw_time(hand->bitmap, time, max);
+        hand->screen.drawBitmap(0, 0, hand->bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
+
+        hand->motor.step(time_diff * hand->step_size);
     }
 }
 
@@ -119,11 +154,11 @@ static void draw_point(uint8_t *bitmap, Point pt) {
     }
 }
 
-// Clear `scrn`'s display.
-static void clear_screen(struct screen_t *scrn) {
+// Clear `hand`'s display.
+static void clear_screen(struct hand_t *hand) {
     uint8_t x, y, width, height;
-    find_bounding(scrn->bitmap, &x, &y, &width, &height);
-    scrn->screen.fillRect(x, y, width, height, BLACK);
+    find_bounding(hand->bitmap, &x, &y, &width, &height);
+    hand->screen.fillRect(x, y, width, height, BLACK);
 }
 
 // Find the minimum bounding box for `bitmap`.

@@ -2,6 +2,7 @@
 #define CLOCK_H
 
 #include <Adafruit_SSD1351.h>
+#include <Stepper.h>
 
 // Use 12-hour time. Must come before util.h.
 #define HOUR24 0
@@ -26,6 +27,8 @@ const uint8_t SCREEN_CENTER_X =
 const uint8_t SCREEN_CENTER_Y =
   (SCREEN_HEIGHT / 2) + constrain(SCREEN_OFF_Y, -(SCREEN_HEIGHT / 2), (SCREEN_HEIGHT / 2) - 1);
 const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
+
+const uint8_t STEPS_PER_REV = 200;
 
 // Compute the angle (in radians) at which to display `val` by computing what
 // percent of a complete revolution it is (relative to `max`).
@@ -57,17 +60,27 @@ static_assert(_test_xy_bit(), "xy2bit and bit2xy are not inverses");
 // [x, y]
 typedef uint8_t Point[2];
 
-struct screen_t {
+struct hand_t {
     Adafruit_SSD1351 screen;
+    Stepper motor;
+    const uint8_t step_size;
+    const pin_t zero_pin;
+    const int8_t zero_off;
     uint8_t bitmap[BITMAP_SZ];
     int8_t time;
+    bool err;
 };
 
-#define SCREEN(cs, dc, mosi, sclk, rst) \
+#define HAND(cs, dc, mosi, sclk, rst, mot1, mot2, mot3, mot4, step, zero, zoff) \
     { \
         .screen = Adafruit_SSD1351(SCREEN_WIDTH, SCREEN_HEIGHT, cs, dc, mosi, sclk, rst), \
+        .motor = Stepper(STEPS_PER_REV, mot1, mot2, mot3, mot4), \
+        .step_size = step, \
+        .zero_pin = zero, \
+        .zero_off = zoff, \
         .bitmap = {0}, \
         .time = -1, \
+        .err = false, \
     }
 
 #endif /* CLOCK_H */
