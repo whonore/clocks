@@ -1,6 +1,10 @@
 #include <Adafruit_SSD1351.h>
 #include <DS3231.h>
 
+// Must be defined before including TimerInterrupt.h
+#define USE_TIMER_1 true
+#include <TimerInterrupt.h>
+
 #include "clock.h"
 #include "font.h"
 
@@ -20,15 +24,21 @@ void setup(void) {
         HANDS[i]->screen.begin();
         HANDS[i]->screen.setRotation(ROTATE);
         HANDS[i]->screen.fillScreen(BG);
-        HANDS[i]->motor.setSpeed(10);
+        HANDS[i]->motor.setMaxSpeed(SPEED_STEPS_PER_SEC);
+        HANDS[i]->motor.setAcceleration(ACCEL_STEPS_PER_SEC);
         pinMode(HANDS[i]->zero_pin, INPUT_PULLUP);
         zero_hand(HANDS[i]);
     }
 
     rtc.begin();
+
+    ITimer1.init();
+    if (!ITimer1.attachInterruptInterval(MOTOR_INTERRUPT_MS, motor_handler)) {
+        hand_min.err = hand_hour.err = true;
+    }
 }
 
-void loop() {
+void loop(void) {
     Time time = rtc.getTime();
     set_time(&hand_min, time.min, MIN_MAX);
     set_time(&hand_hour, time.hour % HOUR_MAX, HOUR_MAX);
@@ -38,7 +48,8 @@ void loop() {
 static void zero_hand(struct hand_t *hand) {
     // Is the switch already pressed?
     if (digitalRead(hand->zero_pin) == LOW) {
-        hand->motor.step(40);
+        hand->motor.move(40);
+        hand->motor.runToPosition();
     }
 
     // Step backwards until the switch is pressed or a full revolution.
@@ -47,7 +58,8 @@ static void zero_hand(struct hand_t *hand) {
         if (digitalRead(hand->zero_pin) == LOW) {
             break;
         }
-        hand->motor.step(-1);
+        hand->motor.move(-1);
+        hand->motor.runToPosition();
         delay(50);
     }
 
@@ -56,22 +68,30 @@ static void zero_hand(struct hand_t *hand) {
 
     // Adjust for the switch offset.
     if (!hand->err) {
-        hand->motor.step(hand->zero_off);
+        hand->motor.move(hand->zero_off);
+        hand->motor.runToPosition();
+        hand->motor.setCurrentPosition(0);
     }
+}
+
+// Move the motors if necessary. Triggered every MOTOR_INTERRUPT_MS
+// milliseconds.
+static void motor_handler(void) {
+    hand_min.motor.run();
+    hand_hour.motor.run();
 }
 
 // Check if `time` is different than what `hand` is currently displaying and,
 // if so, update the display and move the motor.
 static void set_time(struct hand_t *hand, uint8_t time, uint8_t max) {
     if (!hand->err && hand->time != time) {
-        int8_t time_diff = time - max(hand->time, 0);
         hand->time = time;
+
+        hand->motor.moveTo(time * hand->step_size);
 
         clear_screen(hand);
         draw_time(hand->bitmap, time, max);
         hand->screen.drawBitmap(0, 0, hand->bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, FG);
-
-        hand->motor.step(time_diff * hand->step_size);
     }
 }
 

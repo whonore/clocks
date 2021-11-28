@@ -48,4 +48,9 @@ static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
 #define FG WHITE
 #endif
 
+// How often (milliseconds) to trigger the motor timer interrupt.
+#ifndef MOTOR_INTERRUPT_MS
+#define MOTOR_INTERRUPT_MS 10
+#endif
+
 #endif /* CONFIG_H */

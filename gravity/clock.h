@@ -2,7 +2,7 @@
 #define CLOCK_H
 
 #include <Adafruit_SSD1351.h>
-#include <Stepper.h>
+#include <AccelStepper.h>
 
 // Use 12-hour time. Must come before util.h.
 #define HOUR24 0
@@ -37,7 +37,8 @@ const uint8_t SCREEN_CENTER_Y = SWAP_XY ? _SCREEN_CENTER_X : _SCREEN_CENTER_Y;
 
 const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 
-const uint8_t STEPS_PER_REV = 200;
+const double SPEED_STEPS_PER_SEC = 200.0;
+const double ACCEL_STEPS_PER_SEC = 100.0;
 
 // Compute the angle (in radians) at which to display `val` by computing what
 // percent of a complete revolution it is (relative to `max`).
@@ -71,7 +72,7 @@ typedef uint8_t Point[2];
 
 struct hand_t {
     Adafruit_SSD1351 screen;
-    Stepper motor;
+    AccelStepper motor;
     const uint8_t step_size;
     const pin_t zero_pin;
     const int8_t zero_off;
@@ -83,7 +84,7 @@ struct hand_t {
 #define HAND(cs, dc, mosi, sclk, rst, mot1, mot2, mot3, mot4, step, zero, zoff) \
     { \
         .screen = Adafruit_SSD1351(SCREEN_WIDTH, SCREEN_HEIGHT, cs, dc, mosi, sclk, rst), \
-        .motor = Stepper(STEPS_PER_REV, mot1, mot2, mot3, mot4), \
+        .motor = AccelStepper(AccelStepper::FULL4WIRE, mot1, mot2, mot3, mot4), \
         .step_size = step, \
         .zero_pin = zero, \
         .zero_off = zoff, \

@@ -11,3 +11,5 @@ An analog clock with digital displays on the hands that rotate to always remain 
 - [Adafruit STMPE610](https://github.com/adafruit/Adafruit_STMPE610) >=1.1.3
 - [Adafruit TouchScreen](https://github.com/adafruit/Adafruit_TouchScreen) >=1.1.2
 - [DS3231](http://www.rinkydinkelectronics.com/library.php?id=73) >=1.01
+- [AccelStepper](http://www.airspayce.com/mikem/arduino/AccelStepper/) >=1.61.0
+- [TimerInterrupt](https://github.com/khoih-prog/TimerInterrupt) >=1.7.0
