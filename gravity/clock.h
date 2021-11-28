@@ -17,9 +17,6 @@
 #include "util.h"
 #include "config.h"
 
-const uint16_t BLACK = 0x0000;
-const uint16_t WHITE = 0xFFFF;
-
 const uint8_t IMG_WIDTH = RESOLUTION * SCALE;
 const uint8_t IMG_HEIGHT = RESOLUTION * SCALE;
 

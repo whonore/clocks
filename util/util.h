@@ -17,4 +17,9 @@ typedef byte pin_t;
 #define HOUR_MAX 12
 #endif
 
+// Colors
+const uint16_t BLACK = 0x0000;
+const uint16_t WHITE = 0xFFFF;
+const uint16_t YELLOW = 0xFFE0;
+
 #endif /* UTIL_H */

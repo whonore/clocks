@@ -19,7 +19,7 @@ void setup(void) {
     for (uint8_t i = 0; i < ARRAY_LEN(HANDS); i++) {
         HANDS[i]->screen.begin();
         HANDS[i]->screen.setRotation(ROTATE);
-        HANDS[i]->screen.fillScreen(BLACK);
+        HANDS[i]->screen.fillScreen(BG);
         HANDS[i]->motor.setSpeed(10);
         pinMode(HANDS[i]->zero_pin, INPUT_PULLUP);
         zero_hand(HANDS[i]);
@@ -69,7 +69,7 @@ static void set_time(struct hand_t *hand, uint8_t time, uint8_t max) {
 
         clear_screen(hand);
         draw_time(hand->bitmap, time, max);
-        hand->screen.drawBitmap(0, 0, hand->bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, WHITE);
+        hand->screen.drawBitmap(0, 0, hand->bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, FG);
 
         hand->motor.step(time_diff * hand->step_size);
     }
@@ -162,7 +162,7 @@ static void draw_point(uint8_t *bitmap, Point pt) {
 static void clear_screen(struct hand_t *hand) {
     uint8_t x, y, width, height;
     find_bounding(hand->bitmap, &x, &y, &width, &height);
-    hand->screen.fillRect(x, y, width, height, BLACK);
+    hand->screen.fillRect(x, y, width, height, BG);
 }
 
 // Find the minimum bounding box for `bitmap`.

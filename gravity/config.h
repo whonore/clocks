@@ -40,4 +40,12 @@ static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
 #define ROTATE 3
 #endif
 
+// Colors
+#ifndef BG
+#define BG BLACK
+#endif
+#ifndef FG
+#define FG WHITE
+#endif
+
 #endif /* CONFIG_H */
