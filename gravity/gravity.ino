@@ -74,7 +74,7 @@ static void zero_hand(struct hand_t *hand) {
     }
 }
 
-// Move the motors if necessary. Triggered every MOTOR_INTERRUPT_MS
+// Move the motors if necessary. Triggered every `MOTOR_INTERRUPT_MS`
 // milliseconds.
 static void motor_handler(void) {
     hand_min.motor.run();
