@@ -10,9 +10,9 @@
 
 //     CS  DC  MOSI SCLK RST MOT1 MOT2 MOT3 MOT4 STEP ZERO ZOFF
 static hand_t hand_min = \
-  HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  6,   52,  -14);
+  HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  6,   52,  MIN_ZOFF);
 static hand_t hand_hour = \
-  HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  30,  53,  -11);
+  HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  30,  53,  HOUR_ZOFF);
 
 static DS3231 rtc(SDA, SCL);
 

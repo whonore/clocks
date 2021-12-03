@@ -1,6 +1,16 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "local.h"
+
+// The number of steps to offset from the zero switch.
+#ifndef MIN_ZOFF
+#error "Must define MIN_ZOFF in local.h."
+#endif
+#ifndef HOUR_ZOFF
+#error "Must define HOUR_ZOFF in local.h."
+#endif
+
 // The resolution of the digit font in pixels.
 #ifndef RESOLUTION
 #define RESOLUTION 16
@@ -35,12 +45,12 @@ static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
 #define DIGIT_GAP 16
 #endif
 
-// Multiple of 90 degrees to rotate (0-3)
+// Multiple of 90 degrees to rotate (0-3).
 #ifndef ROTATE
 #define ROTATE 3
 #endif
 
-// Colors
+// Screen foreground/background colors.
 #ifndef BG
 #define BG BLACK
 #endif
@@ -51,6 +61,14 @@ static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
 // How often (milliseconds) to trigger the motor timer interrupt.
 #ifndef MOTOR_INTERRUPT_MS
 #define MOTOR_INTERRUPT_MS 10
+#endif
+
+// The maximum speed/acceleration of the motors.
+#ifndef SPEED_STEPS_PER_SEC
+#define SPEED_STEPS_PER_SEC 200.0
+#endif
+#ifndef ACCEL_STEPS_PER_SEC
+#define ACCEL_STEPS_PER_SEC 100.0
 #endif
 
 #endif /* CONFIG_H */

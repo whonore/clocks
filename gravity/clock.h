@@ -37,9 +37,6 @@ const uint8_t SCREEN_CENTER_Y = SWAP_XY ? _SCREEN_CENTER_X : _SCREEN_CENTER_Y;
 
 const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 
-const double SPEED_STEPS_PER_SEC = 200.0;
-const double ACCEL_STEPS_PER_SEC = 100.0;
-
 // Compute the angle (in radians) at which to display `val` by computing what
 // percent of a complete revolution it is (relative to `max`).
 // NOTE: A positive angle corresponds to a counterclockwise rotation.
