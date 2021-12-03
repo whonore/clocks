@@ -91,6 +91,12 @@ class Adafruit_SSD1351 {
             }
         }
 
+        void drawPixel(int16_t x, int16_t y, uint16_t color) {
+            startWrite();
+            writePixel(x, y, color);
+            endWrite();
+        }
+
         void drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w,
                         int16_t h, uint16_t color, uint16_t bg) {
             int16_t byteWidth = (w + 7) / 8;

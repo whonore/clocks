@@ -71,4 +71,9 @@ static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
 #define ACCEL_STEPS_PER_SEC 100.0
 #endif
 
+// Whether to display seconds.
+#ifndef DISPLAY_SEC
+#define DISPLAY_SEC 0
+#endif
+
 #endif /* CONFIG_H */

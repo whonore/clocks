@@ -13,6 +13,9 @@ static hand_t hand_min = \
   HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  6,   52,  MIN_ZOFF);
 static hand_t hand_hour = \
   HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  30,  53,  HOUR_ZOFF);
+#if DISPLAY_SEC
+static int8_t last_sec = -1;
+#endif
 
 static DS3231 rtc(SDA, SCL);
 
@@ -42,6 +45,9 @@ void loop(void) {
     Time time = rtc.getTime();
     set_time(&hand_min, time.min, MIN_MAX);
     set_time(&hand_hour, time.hour % HOUR_MAX, HOUR_MAX);
+#if DISPLAY_SEC
+    set_sec(&hand_min, time.sec);
+#endif
 }
 
 // Step the motor back to the zero point.
@@ -212,3 +218,39 @@ static void find_bounding(const uint8_t *bitmap, uint8_t *x, uint8_t *y,
     *width = max_x - min_x;
     *height = max_y - min_y;
 }
+
+#if DISPLAY_SEC
+// Check if `sec` is different than `hand` is currently displaying and, if so,
+// update the display.
+// TODO: Draw multiple points, catch up if starting partway through the minute.
+static void set_sec(struct hand_t *hand, uint8_t sec) {
+    if (!hand->err && last_sec != sec) {
+        Point pt;
+        last_sec = sec;
+        draw_sec(pt, sec, ANGLE_OF(hand->time, MIN_MAX));
+        hand->screen.drawPixel(pt[0], pt[1], FG);
+    }
+}
+
+// Set `pt` to the next part of the second display.
+static void draw_sec(Point pt, uint8_t sec, double angle) {
+    // TODO: Find the edge of the screen instead of a constant radius.
+    const uint8_t SEC_RADIUS = (2 * IMG_WIDTH);
+
+    // Compute the angle of `sec` relative to the hand's current rotation.
+    angle = ANGLE_OF(sec, SEC_MAX) - angle;
+
+    // Compute the next x and y coordinates of the circle.
+    double x = SEC_RADIUS * sin(angle);
+    double y = SEC_RADIUS * cos(angle);
+
+    // Adjust the coordinate reference frame ((0, 0) is the top left of the
+    // screen, positive y is down on the screen).
+    x += SCREEN_CENTER_X;
+    y = SCREEN_CENTER_Y - y;
+
+    // Round to the nearest integer point.
+    pt[0] = round(x);
+    pt[1] = round(y);
+}
+#endif
