@@ -42,6 +42,28 @@ const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 // NOTE: A positive angle corresponds to a counterclockwise rotation.
 #define ANGLE_OF(val, max) ((val * 2 * M_PI) / max)
 
+// Wrap `angle` into the [0, 2pi) range.
+#define NORMALIZE_ANGLE(angle) \
+    ((angle) - (2 * M_PI) * floor((angle) / (2 * M_PI)))
+
+// Determine which edge a line projected from the screen center at `angle`
+// intersects.
+enum Edge {
+    TOP,
+    RIGHT,
+    BOTTOM,
+    LEFT,
+};
+#define EDGE_OF_ANGLE(angle) ( \
+    ((0 <= (angle) && (angle) <= M_PI / 4) \
+     || (7 * (M_PI / 4) < (angle) && (angle) <= 2 * M_PI)) \
+    ? TOP \
+    : (M_PI / 4 < (angle) && (angle) <= 3 * (M_PI / 4)) \
+    ? RIGHT \
+    : (3 * (M_PI / 4) < (angle) && (angle) <= 5 * (M_PI / 4)) \
+    ? BOTTOM \
+    : LEFT)
+
 // Convert between (x, y) coordinates and bitmap (idx, bit) pairs.
 #define _xy2idx(x, y) (y * SCREEN_WIDTH + x)
 #define xy2bit(x, y, idx, bit) \

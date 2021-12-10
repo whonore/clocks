@@ -235,15 +235,30 @@ static void set_sec(struct hand_t *hand, uint8_t sec) {
 
 // Set `pt` to the next part of the second display.
 static void draw_sec(Point pt, uint8_t sec, double angle) {
-    // TODO: Find the edge of the screen instead of a constant radius.
-    const uint8_t SEC_RADIUS = (2 * IMG_WIDTH);
-
     // Compute the angle of `sec` relative to the hand's current rotation.
-    angle = ANGLE_OF(sec, SEC_MAX) - angle;
+    angle = NORMALIZE_ANGLE(ANGLE_OF(sec, SEC_MAX) - angle);
 
-    // Compute the next x and y coordinates of the circle.
-    double x = SEC_RADIUS * sin(angle);
-    double y = SEC_RADIUS * cos(angle);
+    // Compute the distance to the edge of the screen at the given angle.
+    double x;
+    double y;
+    switch EDGE_OF_ANGLE(angle) {
+        case TOP:
+            x = (SCREEN_WIDTH / 2) * tan(angle);
+            y = (SCREEN_HEIGHT / 2) - 1;
+            break;
+        case BOTTOM:
+            x = -(SCREEN_WIDTH / 2) * tan(angle);
+            y = -(SCREEN_HEIGHT / 2) + 2;
+            break;
+        case RIGHT:
+            x = (SCREEN_WIDTH / 2) - 2;
+            y = (SCREEN_HEIGHT / 2) * tan((M_PI / 2) - angle);
+            break;
+        case LEFT:
+            x = -(SCREEN_WIDTH / 2) + 2;
+            y = -(SCREEN_HEIGHT / 2) * tan((M_PI / 2) - angle);
+            break;
+    }
 
     // Adjust the coordinate reference frame ((0, 0) is the top left of the
     // screen, positive y is down on the screen).
