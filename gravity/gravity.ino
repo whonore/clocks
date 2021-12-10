@@ -228,14 +228,13 @@ static void find_bounding(const uint8_t *bitmap, uint8_t *x, uint8_t *y,
 #if DISPLAY_SEC
 // Check if `sec` is different than what `hand` is currently displaying and, if
 // so, update the display.
-// TODO: Draw multiple points.
 static void set_sec(struct hand_t *hand, uint8_t sec) {
     if (!hand->err && last_sec != sec) {
         double angle = ANGLE_OF(hand->time, MIN_MAX);
 
         // Compute the previous and next points.
         Point pt, tgt_pt;
-        draw_sec(tgt_pt, sec, angle);
+        enum Edge edge = draw_sec(tgt_pt, sec, angle);
         if (last_sec != -1) {
             draw_sec(pt, last_sec, angle);
         } else {
@@ -246,14 +245,37 @@ static void set_sec(struct hand_t *hand, uint8_t sec) {
         do {
             if (pt[0] < tgt_pt[0] && pt[1] <= tgt_pt[1]) {
                 pt[0] += 1;
+                edge = TOP;
             } else if (pt[0] > tgt_pt[0] && pt[1] >= tgt_pt[1]) {
                 pt[0] -= 1;
+                edge = BOTTOM;
             } else if (pt[1] < tgt_pt[1]) {
                 pt[1] += 1;
+                edge = RIGHT;
             } else if (pt[1] > tgt_pt[1]) {
                 pt[1] -= 1;
+                edge = LEFT;
             }
-            hand->screen.drawPixel(pt[0], pt[1], FG);
+
+            // Compute the point `SEC_THICKNESS` pixels away.
+            Point pt_end;
+            memcpy(pt_end, pt, sizeof(Point));
+            switch (edge) {
+                case TOP:
+                    pt_end[1] += SEC_THICKNESS_OFF;
+                    break;
+                case BOTTOM:
+                    pt_end[1] -= SEC_THICKNESS_OFF;
+                    break;
+                case RIGHT:
+                    pt_end[0] -= SEC_THICKNESS_OFF;
+                    break;
+                case LEFT:
+                    pt_end[0] += SEC_THICKNESS_OFF;
+                    break;
+            }
+
+            hand->screen.drawLine(pt[0], pt[1], pt_end[0], pt_end[1], FG);
         } while (pt[0] != tgt_pt[0] || pt[1] != tgt_pt[1]);
 
         last_sec = sec;
@@ -261,14 +283,15 @@ static void set_sec(struct hand_t *hand, uint8_t sec) {
 }
 
 // Set `pt` to the next part of the second display.
-static void draw_sec(Point pt, uint8_t sec, double angle) {
+static enum Edge draw_sec(Point pt, uint8_t sec, double angle) {
     // Compute the angle of `sec` relative to the hand's current rotation.
     angle = NORMALIZE_ANGLE(ANGLE_OF(sec, SEC_MAX) - angle);
 
     // Compute the distance to the edge of the screen at the given angle.
     double x;
     double y;
-    switch EDGE_OF_ANGLE(angle) {
+    enum Edge edge = EDGE_OF_ANGLE(angle);
+    switch (edge) {
         case TOP:
             x = (SCREEN_WIDTH / 2) * tan(angle);
             y = (SCREEN_HEIGHT / 2) - 1;
@@ -295,5 +318,7 @@ static void draw_sec(Point pt, uint8_t sec, double angle) {
     // Round to the nearest integer point.
     pt[0] = round(x);
     pt[1] = round(y);
+
+    return edge;
 }
 #endif

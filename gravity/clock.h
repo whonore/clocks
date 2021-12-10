@@ -37,6 +37,12 @@ const uint8_t SCREEN_CENTER_Y = SWAP_XY ? _SCREEN_CENTER_X : _SCREEN_CENTER_Y;
 
 const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
 
+#if DISPLAY_SEC
+// The offset for the inner edge of the second display is 1 pixel less than the
+// `SEC_THICKNESS`.
+const uint8_t SEC_THICKNESS_OFF = SEC_THICKNESS - 1;
+#endif
+
 // Compute the angle (in radians) at which to display `val` by computing what
 // percent of a complete revolution it is (relative to `max`).
 // NOTE: A positive angle corresponds to a counterclockwise rotation.

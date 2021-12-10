@@ -81,4 +81,13 @@ static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
 #define DISPLAY_SEC 0
 #endif
 
+#if DISPLAY_SEC
+// How thick (in pixels) to draw the second indicator.
+#ifndef SEC_THICKNESS
+#define SEC_THICKNESS 2
+#endif
+
+static_assert(1 <= SEC_THICKNESS, "SEC_THICKNESS must be at least 1");
+#endif
+
 #endif /* CONFIG_H */

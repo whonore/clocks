@@ -4,6 +4,15 @@
 #include <arduino.h>
 #include <ncurses.h>
 
+#ifndef _swap_int16_t
+#define _swap_int16_t(a, b) \
+    { \
+        int16_t t = a; \
+        a = b; \
+        b = t; \
+    }
+#endif
+
 static unsigned int nwindows = 0;
 
 class Adafruit_SSD1351 {
@@ -94,6 +103,48 @@ class Adafruit_SSD1351 {
         void drawPixel(int16_t x, int16_t y, uint16_t color) {
             startWrite();
             writePixel(x, y, color);
+            endWrite();
+        }
+
+        void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
+                      uint16_t color) {
+            int16_t steep = abs(y1 - y0) > abs(x1 - x0);
+            if (steep) {
+                _swap_int16_t(x0, y0);
+                _swap_int16_t(x1, y1);
+            }
+
+            if (x0 > x1) {
+                _swap_int16_t(x0, x1);
+                _swap_int16_t(y0, y1);
+            }
+
+            int16_t dx, dy;
+            dx = x1 - x0;
+            dy = abs(y1 - y0);
+
+            int16_t err = dx / 2;
+            int16_t ystep;
+
+            if (y0 < y1) {
+                ystep = 1;
+            } else {
+                ystep = -1;
+            }
+
+            startWrite();
+            for (; x0 <= x1; x0++) {
+                if (steep) {
+                    writePixel(y0, x0, color);
+                } else {
+                    writePixel(x0, y0, color);
+                }
+                err -= dy;
+                if (err < 0) {
+                    y0 += ystep;
+                    err += dx;
+                }
+            }
             endWrite();
         }
 
