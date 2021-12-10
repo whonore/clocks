@@ -71,6 +71,11 @@ static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
 #define ACCEL_STEPS_PER_SEC 100.0
 #endif
 
+// The number of degrees the hands turn per step of the motor.
+#ifndef DEGREES_PER_STEP
+#define DEGREES_PER_STEP 1
+#endif
+
 // Whether to display seconds.
 #ifndef DISPLAY_SEC
 #define DISPLAY_SEC 0

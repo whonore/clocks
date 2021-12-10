@@ -70,7 +70,7 @@ typedef uint8_t Point[2];
 struct hand_t {
     Adafruit_SSD1351 screen;
     AccelStepper motor;
-    const uint8_t step_size;
+    const uint8_t max_time;
     const pin_t zero_pin;
     const int8_t zero_off;
     uint8_t bitmap[BITMAP_SZ];
@@ -78,16 +78,19 @@ struct hand_t {
     bool err;
 };
 
-#define HAND(cs, dc, mosi, sclk, rst, mot1, mot2, mot3, mot4, step, zero, zoff) \
+#define HAND(cs, dc, mosi, sclk, rst, mot1, mot2, mot3, mot4, zero, zoff, max) \
     { \
         .screen = Adafruit_SSD1351(SCREEN_WIDTH, SCREEN_HEIGHT, cs, dc, mosi, sclk, rst), \
         .motor = AccelStepper(AccelStepper::FULL4WIRE, mot1, mot2, mot3, mot4), \
-        .step_size = step, \
+        .max_time = max, \
         .zero_pin = zero, \
         .zero_off = zoff, \
         .bitmap = {0}, \
         .time = -1, \
         .err = false, \
     }
+
+// How many steps to take for each time increment to reach 360 degrees.
+#define STEPS_PER_TIME(hand) (360 / (DEGREES_PER_STEP * (hand)->max_time))
 
 #endif /* CLOCK_H */

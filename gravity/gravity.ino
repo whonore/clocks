@@ -8,11 +8,11 @@
 #include "clock.h"
 #include "font.h"
 
-//     CS  DC  MOSI SCLK RST MOT1 MOT2 MOT3 MOT4 STEP ZERO ZOFF
+//     CS  DC  MOSI SCLK RST MOT1 MOT2 MOT3 MOT4 ZERO ZOFF       MAX
 static hand_t hand_min = \
-  HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  6,   52,  MIN_ZOFF);
+  HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  52,  MIN_ZOFF,  MIN_MAX);
 static hand_t hand_hour = \
-  HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  30,  53,  HOUR_ZOFF);
+  HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  53,  HOUR_ZOFF, HOUR_MAX);
 #if DISPLAY_SEC
 static int8_t last_sec = -1;
 #endif
@@ -43,8 +43,8 @@ void setup(void) {
 
 void loop(void) {
     Time time = rtc.getTime();
-    set_time(&hand_min, time.min, MIN_MAX);
-    set_time(&hand_hour, time.hour % HOUR_MAX, HOUR_MAX);
+    set_time(&hand_min, time.min);
+    set_time(&hand_hour, time.hour);
 #if DISPLAY_SEC
     set_sec(&hand_min, time.sec);
 #endif
@@ -89,14 +89,15 @@ static void motor_handler(void) {
 
 // Check if `time` is different than what `hand` is currently displaying and,
 // if so, update the display and move the motor.
-static void set_time(struct hand_t *hand, uint8_t time, uint8_t max) {
+static void set_time(struct hand_t *hand, uint8_t time) {
+    time = time % hand->max_time;
     if (!hand->err && hand->time != time) {
         hand->time = time;
 
-        hand->motor.moveTo(time * hand->step_size);
+        hand->motor.moveTo(time * STEPS_PER_TIME(hand));
 
         clear_screen(hand);
-        draw_time(hand->bitmap, time, max);
+        draw_time(hand->bitmap, time, hand->max_time);
         hand->screen.drawBitmap(0, 0, hand->bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, FG);
     }
 }
