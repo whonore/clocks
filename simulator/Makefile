@@ -1,4 +1,4 @@
-CCOPTS := -Wall -Wextra -Iarduino
+CCOPTS := -Wall -Wextra -Os -Iarduino
 CCLINK := -lpthread -lncurses
 ifneq ($(DEBUG),)
 CCOPTS += -DDEBUG=$(DEBUG)
