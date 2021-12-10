@@ -275,7 +275,7 @@ static void set_sec(struct hand_t *hand, uint8_t sec) {
                     break;
             }
 
-            hand->screen.drawLine(pt[0], pt[1], pt_end[0], pt_end[1], FG);
+            hand->screen.drawLine(pt[0], pt[1], pt_end[0], pt_end[1], SEC_FG);
         } while (pt[0] != tgt_pt[0] || pt[1] != tgt_pt[1]);
 
         last_sec = sec;
