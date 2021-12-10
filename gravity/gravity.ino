@@ -176,7 +176,7 @@ static void draw_digit(uint8_t *bitmap, uint8_t digit, bool left, double angle) 
 }
 
 // Set the bit in `bitmap` corresponding to `pt`.
-static void draw_point(uint8_t *bitmap, Point pt) {
+static void draw_point(uint8_t *bitmap, const Point pt) {
     if (pt[0] < SCREEN_WIDTH && pt[1] < SCREEN_WIDTH) {
         uint16_t idx;
         uint8_t bit;
