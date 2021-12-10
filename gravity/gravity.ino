@@ -46,6 +46,11 @@ void loop(void) {
     set_time(&hand_min, time.min);
     set_time(&hand_hour, time.hour);
 #if DISPLAY_SEC
+    if (last_sec == -1) {
+        for (uint8_t sec = 0; sec < time.sec; sec++) {
+            set_sec(&hand_min, sec);
+        }
+    }
     set_sec(&hand_min, time.sec);
 #endif
 }
@@ -221,15 +226,37 @@ static void find_bounding(const uint8_t *bitmap, uint8_t *x, uint8_t *y,
 }
 
 #if DISPLAY_SEC
-// Check if `sec` is different than `hand` is currently displaying and, if so,
-// update the display.
-// TODO: Draw multiple points, catch up if starting partway through the minute.
+// Check if `sec` is different than what `hand` is currently displaying and, if
+// so, update the display.
+// TODO: Draw multiple points.
 static void set_sec(struct hand_t *hand, uint8_t sec) {
     if (!hand->err && last_sec != sec) {
-        Point pt;
+        double angle = ANGLE_OF(hand->time, MIN_MAX);
+
+        // Compute the previous and next points.
+        Point pt, tgt_pt;
+        draw_sec(tgt_pt, sec, angle);
+        if (last_sec != -1) {
+            draw_sec(pt, last_sec, angle);
+        } else {
+            memcpy(pt, tgt_pt, sizeof(Point));
+        }
+
+        // Fill in all points from `pt` to `tgt_pt`.
+        do {
+            if (pt[0] < tgt_pt[0] && pt[1] <= tgt_pt[1]) {
+                pt[0] += 1;
+            } else if (pt[0] > tgt_pt[0] && pt[1] >= tgt_pt[1]) {
+                pt[0] -= 1;
+            } else if (pt[1] < tgt_pt[1]) {
+                pt[1] += 1;
+            } else if (pt[1] > tgt_pt[1]) {
+                pt[1] -= 1;
+            }
+            hand->screen.drawPixel(pt[0], pt[1], FG);
+        } while (pt[0] != tgt_pt[0] || pt[1] != tgt_pt[1]);
+
         last_sec = sec;
-        draw_sec(pt, sec, ANGLE_OF(hand->time, MIN_MAX));
-        hand->screen.drawPixel(pt[0], pt[1], FG);
     }
 }
 
