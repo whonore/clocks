@@ -293,20 +293,20 @@ static enum Edge draw_sec(Point pt, uint8_t sec, double angle) {
     enum Edge edge = EDGE_OF_ANGLE(angle);
     switch (edge) {
         case TOP:
-            x = (SCREEN_WIDTH / 2) * tan(angle);
-            y = (SCREEN_HEIGHT / 2) - 1;
+            x = (SCREEN_WIDTH_R / 2) * tan(angle);
+            y = (SCREEN_HEIGHT_R / 2) - SEC_MARGIN_TOP_R;
             break;
         case BOTTOM:
-            x = -(SCREEN_WIDTH / 2) * tan(angle);
-            y = -(SCREEN_HEIGHT / 2) + 2;
+            x = -(SCREEN_WIDTH_R / 2) * tan(angle);
+            y = -(SCREEN_HEIGHT_R / 2) + SEC_MARGIN_BOTTOM_R;
             break;
         case RIGHT:
-            x = (SCREEN_WIDTH / 2) - 2;
-            y = (SCREEN_HEIGHT / 2) * tan((M_PI / 2) - angle);
+            x = (SCREEN_WIDTH_R / 2) - SEC_MARGIN_RIGHT_R;
+            y = (SCREEN_HEIGHT_R / 2) * tan((M_PI / 2) - angle);
             break;
         case LEFT:
-            x = -(SCREEN_WIDTH / 2) + 2;
-            y = -(SCREEN_HEIGHT / 2) * tan((M_PI / 2) - angle);
+            x = -(SCREEN_WIDTH_R / 2) + SEC_MARGIN_LEFT_R;
+            y = -(SCREEN_HEIGHT_R / 2) * tan((M_PI / 2) - angle);
             break;
     }
 
@@ -316,8 +316,8 @@ static enum Edge draw_sec(Point pt, uint8_t sec, double angle) {
     y = SCREEN_CENTER_Y - y;
 
     // Round to the nearest integer point.
-    pt[0] = round(x);
-    pt[1] = round(y);
+    pt[0] = round(constrain(x, 0, SCREEN_WIDTH - 1));
+    pt[1] = round(constrain(y, 0, SCREEN_HEIGHT - 1));
 
     return edge;
 }

@@ -88,8 +88,22 @@ static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
 #ifndef SEC_THICKNESS
 #define SEC_THICKNESS 2
 #endif
-
 static_assert(1 <= SEC_THICKNESS, "SEC_THICKNESS must be at least 1");
+
+// How many pixels from the edge to shift the second display (relative
+// to ROTATE = 0).
+#ifndef SEC_MARGIN_TOP
+#define SEC_MARGIN_TOP 0
+#endif
+#ifndef SEC_MARGIN_RIGHT
+#define SEC_MARGIN_RIGHT 0
+#endif
+#ifndef SEC_MARGIN_BOTTOM
+#define SEC_MARGIN_BOTTOM 0
+#endif
+#ifndef SEC_MARGIN_LEFT
+#define SEC_MARGIN_LEFT 0
+#endif
 #endif
 
 #endif /* CONFIG_H */

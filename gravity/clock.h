@@ -35,7 +35,31 @@ const uint8_t _SCREEN_CENTER_Y =
 const uint8_t SCREEN_CENTER_X = SWAP_XY ? _SCREEN_CENTER_Y : _SCREEN_CENTER_X;
 const uint8_t SCREEN_CENTER_Y = SWAP_XY ? _SCREEN_CENTER_X : _SCREEN_CENTER_Y;
 
-const uint16_t BITMAP_SZ = (SCREEN_WIDTH * SCREEN_HEIGHT) / 8;
+const uint8_t SCREEN_WIDTH_R = SWAP_XY ? SCREEN_HEIGHT : SCREEN_WIDTH;
+const uint8_t SCREEN_HEIGHT_R = SWAP_XY ? SCREEN_WIDTH : SCREEN_HEIGHT;
+
+const uint8_t SEC_MARGIN_TOP_R =
+    (ROTATE == 0) ? SEC_MARGIN_TOP
+    : (ROTATE == 1) ? SEC_MARGIN_RIGHT
+    : (ROTATE == 2) ? SEC_MARGIN_BOTTOM
+    : SEC_MARGIN_LEFT;
+const uint8_t SEC_MARGIN_RIGHT_R =
+    (ROTATE == 0) ? SEC_MARGIN_RIGHT
+    : (ROTATE == 1) ? SEC_MARGIN_BOTTOM
+    : (ROTATE == 2) ? SEC_MARGIN_LEFT
+    : SEC_MARGIN_TOP;
+const uint8_t SEC_MARGIN_BOTTOM_R =
+    (ROTATE == 0) ? SEC_MARGIN_BOTTOM
+    : (ROTATE == 1) ? SEC_MARGIN_LEFT
+    : (ROTATE == 2) ? SEC_MARGIN_TOP
+    : SEC_MARGIN_RIGHT;
+const uint8_t SEC_MARGIN_LEFT_R =
+    (ROTATE == 0) ? SEC_MARGIN_LEFT
+    : (ROTATE == 1) ? SEC_MARGIN_TOP
+    : (ROTATE == 2) ? SEC_MARGIN_RIGHT
+    : SEC_MARGIN_BOTTOM;
+
+const uint16_t BITMAP_SZ = (SCREEN_WIDTH_R * SCREEN_HEIGHT_R) / 8;
 
 #if DISPLAY_SEC
 // The offset for the inner edge of the second display is 1 pixel less than the
