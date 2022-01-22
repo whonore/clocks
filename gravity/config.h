@@ -23,7 +23,6 @@
 #ifndef SCREEN_HEIGHT
 #define SCREEN_HEIGHT 128
 #endif
-
 static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
               "SCREEN_WIDTH * SCREEN_HEIGHT must be a multiple of 8");
 
