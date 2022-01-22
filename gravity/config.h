@@ -56,9 +56,6 @@ static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
 #ifndef FG
 #define FG WHITE
 #endif
-#ifndef SEC_FG
-#define SEC_FG FG
-#endif
 
 // How often (milliseconds) to trigger the motor timer interrupt.
 #ifndef MOTOR_INTERRUPT_MS
@@ -84,14 +81,19 @@ static_assert((SCREEN_WIDTH * SCREEN_HEIGHT) % 8 == 0,
 #endif
 
 #if DISPLAY_SEC
+// Second indicator color.
+#ifndef SEC_FG
+#define SEC_FG FG
+#endif
+
 // How thick (in pixels) to draw the second indicator.
 #ifndef SEC_THICKNESS
 #define SEC_THICKNESS 2
 #endif
 static_assert(1 <= SEC_THICKNESS, "SEC_THICKNESS must be at least 1");
 
-// How many pixels from the edge to shift the second display (relative
-// to ROTATE = 0).
+// How many pixels from the edge to shift the second indicator
+// (relative to ROTATE = 0).
 #ifndef SEC_MARGIN_TOP
 #define SEC_MARGIN_TOP 0
 #endif
