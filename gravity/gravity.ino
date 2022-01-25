@@ -8,11 +8,11 @@
 #include "clock.h"
 #include "font.h"
 
-//     CS  DC  MOSI SCLK RST MOT1 MOT2 MOT3 MOT4 ZERO ZOFF       MAX
+//       CS  DC  MOSI SCLK RST MOT1 MOT2 MOT3 MOT4 ZERO ZOFF       MAX
 static hand_t hand_min = \
-  HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  52,  MIN_ZOFF,  MIN_MAX);
+    HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  52,  MIN_ZOFF,  MIN_MAX);
 static hand_t hand_hour = \
-  HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  53,  HOUR_ZOFF, HOUR_MAX);
+    HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  53,  HOUR_ZOFF, HOUR_MAX);
 #if DISPLAY_SEC
 static int8_t last_sec = -1;
 #endif
