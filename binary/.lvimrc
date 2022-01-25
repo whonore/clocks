@@ -1,0 +1,2 @@
+let b:ale_cpp_cc_options .= ' -DNEOPIXEL=0'
+let b:ale_cpp_cppcheck_options .= ' -DNEOPIXEL=0'
