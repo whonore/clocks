@@ -30,7 +30,7 @@ static ticks_t total_ticks = 0;
 
 // The time offset to add to the Arduino's internal clock. Set by pressing the
 // minute and hour buttons.
-static struct time_t off = { .secs = 0, .mins = 0, .hours = 0 };
+static struct clock_time_t off = { .secs = 0, .mins = 0, .hours = 0 };
 
 void setup() {
 #if DEBUG
@@ -106,7 +106,7 @@ void loop() {
 
     // Update the display.
     if (at_second || hour_pressed || min_pressed) {
-        struct time_t time = off;
+        struct clock_time_t time = off;
         ticksToTime(&time, total_ticks);
         dispTimes(time.secs, time.mins, time.hours);
         DPRINTF("H:%u\tM:%u\tS:%u\n", time.hours, time.mins, time.secs);
@@ -124,7 +124,7 @@ static bool pressed(pin_t button, byte *old, byte active) {
 }
 
 // Convert `ticks` to seconds, minutes, and hours and add them to `time`.
-static void ticksToTime(struct time_t *time, ticks_t ticks) {
+static void ticksToTime(struct clock_time_t *time, ticks_t ticks) {
     uint32_t sec = time->secs + (ticks / TICKS_PER_SEC);
     uint32_t min = time->mins + (sec / SEC_MAX);
     uint32_t hour = time->hours + (min / MIN_MAX);

@@ -36,7 +36,7 @@ typedef uint64_t ticks_t;
 static_assert(TICKS_PER_DAY / TICKS_PER_SEC == (ticks_t) SEC_MAX * MIN_MAX * HOUR_MAX,
               "Ticks overflowed");
 
-struct time_t {
+struct clock_time_t {
     byte secs;
     byte mins;
     byte hours;
