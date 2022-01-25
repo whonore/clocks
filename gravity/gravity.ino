@@ -219,7 +219,6 @@ static void find_bounding(const uint8_t *bitmap, uint8_t *x, uint8_t *y,
     }
 
     *x = min_x;
-    *x = min_x;
     *y = min_y;
     *width = max_x - min_x;
     *height = max_y - min_y;
