@@ -7,7 +7,7 @@ typedef byte pin_t;
 
 // Maximum times
 #ifndef HOUR24
-#define HOUR24 1
+#  define HOUR24 1
 #endif
 
 #define SEC_MAX  60
@@ -21,11 +21,15 @@ const uint16_t YELLOW = 0xFFE0;
 
 // Debug printing
 #if DEBUG
-#define DEBUG_SZ 256
+#  define DEBUG_SZ 256
 static char debug[DEBUG_SZ];
-#define DPRINTF(...) snprintf(debug, DEBUG_SZ, __VA_ARGS__); Serial.print(debug)
+#  define DPRINTF(...)                      \
+    snprintf(debug, DEBUG_SZ, __VA_ARGS__); \
+    Serial.print(debug)
 #else
-#define DPRINTF(...) do {} while (0)
+#  define DPRINTF(...) \
+    do {               \
+    } while (0)
 #endif
 
 #endif /* UTIL_H */

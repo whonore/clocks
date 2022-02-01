@@ -2,15 +2,18 @@
 #include <math.h>
 #include <ncurses.h>
 #include <pthread.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
 
 #include "arduino.h"
 
-struct pin_t { uint8_t mode; uint8_t val; };
+struct pin_t {
+    uint8_t mode;
+    uint8_t val;
+};
 static struct pin_t pins[NPINS];
 
 // Serial
@@ -25,13 +28,9 @@ void Serial_::print(const char *str) {
     strncat(this->_out, str, SERIAL_OUT - len - 1);
 }
 
-void Serial_::begin(unsigned int UNUSED(baud)) {
-    this->init = true;
-}
+void Serial_::begin(unsigned int UNUSED(baud)) { this->init = true; }
 
-Serial_::operator bool() {
-    return this->init;
-}
+Serial_::operator bool() { return this->init; }
 
 // Library
 static double time_factor;
@@ -45,13 +44,9 @@ static uint32_t _micros() {
     return (ticks.tv_sec * 1000000) + (ticks.tv_nsec / 1000) - usec_offset;
 }
 
-uint32_t micros() {
-    return SCALE_TIME(_micros());
-}
+uint32_t micros() { return SCALE_TIME(_micros()); }
 
-uint32_t millis() {
-    return micros() / 1000;
-}
+uint32_t millis() { return micros() / 1000; }
 
 void delay(uint32_t ms) {
     struct timespec time;
@@ -92,25 +87,25 @@ static void *getkb(void *UNUSED(_arg)) {
     while (!quit) {
         int pin = getch();
         switch (pin) {
-            case 'q':
-                quit = true;
-                break;
-            case '+':
-                time_factor += 1;
-                break;
-            case '-':
-                time_factor -= 1;
-                break;
-            case ' ':
-                time_factor = 1;
-                break;
-            default:
-                if ('A' <= pin && pin < 'A' + NPINS) {
-                    pin -= 'A';
-                    if isinput(pins[pin].mode) {
-                        pins[pin].val = HIGH;
-                    }
+        case 'q':
+            quit = true;
+            break;
+        case '+':
+            time_factor += 1;
+            break;
+        case '-':
+            time_factor -= 1;
+            break;
+        case ' ':
+            time_factor = 1;
+            break;
+        default:
+            if ('A' <= pin && pin < 'A' + NPINS) {
+                pin -= 'A';
+                if isinput (pins[pin].mode) {
+                    pins[pin].val = HIGH;
                 }
+            }
         }
     }
 
@@ -126,9 +121,7 @@ static void pins_init() {
     }
 }
 
-static void arduino_init() {
-    pins_init();
-}
+static void arduino_init() { pins_init(); }
 
 #if DEBUG_PINS
 static void print_pin(int i) {
@@ -144,9 +137,8 @@ static void print_pin(int i) {
         mvprintw(y, x, "A%d", i - A0);
     }
 
-    c = isoutput(pins[i].mode)
-        ? ('v' | ((pins[i].val == HIGH) ? A_REVERSE : 0))
-        : '^';
+    c = isoutput(pins[i].mode) ? ('v' | ((pins[i].val == HIGH) ? A_REVERSE : 0))
+                               : '^';
     mvaddch(y + 1, x + 1, c);
     move(y, x + 3);
 }
@@ -159,10 +151,12 @@ static void display() {
     getmaxyx(stdscr, y, x);
     int left = x / 2 - 3 * NPINS / 2;
 
-    mvprintw(y / 2 - 5, left, "Time (simulated x%.2f): %u",
-             time_factor, usec_scaled / 1000000);
-    mvprintw(y / 2 - 4, left, "Time (true):              %u",
-             usec / 1000000);
+    mvprintw(y / 2 - 5,
+             left,
+             "Time (simulated x%.2f): %u",
+             time_factor,
+             usec_scaled / 1000000);
+    mvprintw(y / 2 - 4, left, "Time (true):              %u", usec / 1000000);
 
     move(y / 2 - 1, left);
     for (i = 0; i < NPINS; i++) {

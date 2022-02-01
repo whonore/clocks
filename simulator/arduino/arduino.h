@@ -8,43 +8,44 @@
 #include <string.h>
 
 #ifndef DEBUG_PINS
-#define DEBUG_PINS 0
+#  define DEBUG_PINS 0
 #endif
 
-#define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
+#define UNUSED(x) UNUSED_##x __attribute__((__unused__))
 
 typedef uint8_t byte;
 
-#define LOW 0
+#define LOW  0
 #define HIGH 1
 
-#define INPUT 0
-#define OUTPUT 1
-#define INPUT_PULLUP 2
-#define isinput(mode) ((mode) == INPUT || (mode) == INPUT_PULLUP)
+#define INPUT          0
+#define OUTPUT         1
+#define INPUT_PULLUP   2
+#define isinput(mode)  ((mode) == INPUT || (mode) == INPUT_PULLUP)
 #define isoutput(mode) ((mode) == OUTPUT)
 
-#define A0 14
-#define A1 15
-#define A2 16
-#define A3 17
-#define A4 18
-#define A5 19
-#define SDA 18
-#define SCL 19
+#define A0    14
+#define A1    15
+#define A2    16
+#define A3    17
+#define A4    18
+#define A5    19
+#define SDA   18
+#define SCL   19
 #define NPINS 20
 
 // Serial
 #define SERIAL_OUT 256
 class Serial_ {
-    private:
-        bool init = false;
-    public:
-        char _out[SERIAL_OUT];
-        Serial_() { memset(this->_out, '\0', SERIAL_OUT); }
-        void begin(unsigned int baud);
-        void print(const char *str);
-        operator bool();
+  private:
+    bool init = false;
+
+  public:
+    char _out[SERIAL_OUT];
+    Serial_() { memset(this->_out, '\0', SERIAL_OUT); }
+    void begin(unsigned int baud);
+    void print(const char *str);
+    operator bool();
 };
 extern Serial_ Serial;
 
@@ -58,10 +59,11 @@ void digitalWrite(uint8_t pin, uint8_t val);
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
-#define constrain(amt, low, high) ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
+#define constrain(amt, low, high) \
+  ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
 
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
-#define bitSet(value, bit) ((value) |= (1UL << (bit)))
+#define bitSet(value, bit)  ((value) |= (1UL << (bit)))
 
 // Program Memory
 #define PROGMEM

@@ -16,17 +16,16 @@ enum {
 };
 
 class TimerInterrupt {
-    public:
-        TimerInterrupt(uint8_t UNUSED(timerNo)) { }
+  public:
+    TimerInterrupt(uint8_t UNUSED(timerNo)) {}
 
-        void init() { }
+    void init() {}
 
-        bool attachInterruptInterval(unsigned long UNUSED(interval),
-                                     timer_callback UNUSED(callback),
-                                     unsigned long UNUSED(duration) = 0) {
-            return true;
-        }
-
+    bool attachInterruptInterval(unsigned long UNUSED(interval),
+                                 timer_callback UNUSED(callback),
+                                 unsigned long UNUSED(duration) = 0) {
+        return true;
+    }
 };
 
 TimerInterrupt ITimer1(HW_TIMER_1);

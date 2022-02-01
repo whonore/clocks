@@ -8,11 +8,13 @@
 #include "clock.h"
 #include "font.h"
 
-//       CS  DC  MOSI SCLK RST MOT1 MOT2 MOT3 MOT4 ZERO ZOFF       MAX
+// clang-format off
+//     CS  DC  MOSI SCLK RST MOT1 MOT2 MOT3 MOT4 ZERO ZOFF       MAX
 static hand_t hand_min = \
-    HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  52,  MIN_ZOFF,  MIN_MAX);
+  HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  52,  MIN_ZOFF,  MIN_MAX);
 static hand_t hand_hour = \
-    HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  53,  HOUR_ZOFF, HOUR_MAX);
+  HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  53,  HOUR_ZOFF, HOUR_MAX);
+// clang-format on
 #if DISPLAY_SEC
 static int8_t last_sec = -1;
 #endif
@@ -103,7 +105,8 @@ static void set_time(struct hand_t *hand, uint8_t time) {
 
         clear_screen(hand);
         draw_time(hand->bitmap, time, hand->max_time);
-        hand->screen.drawBitmap(0, 0, hand->bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, FG);
+        hand->screen
+          .drawBitmap(0, 0, hand->bitmap, SCREEN_WIDTH, SCREEN_HEIGHT, FG);
     }
 }
 
@@ -124,7 +127,10 @@ static void draw_time(uint8_t *bitmap, uint8_t val, uint8_t max) {
 
 // Set the bits in `bitmap` corresponding to `digit` rotated by `angle` in
 // either the left or right half of the screen.
-static void draw_digit(uint8_t *bitmap, uint8_t digit, bool left, double angle) {
+static void draw_digit(uint8_t *bitmap,
+                       uint8_t digit,
+                       bool left,
+                       double angle) {
     Point pt;
 
     for (size_t i = 0; i < font_len[digit]; i++) {
@@ -139,9 +145,8 @@ static void draw_digit(uint8_t *bitmap, uint8_t digit, bool left, double angle) 
 
         // Translate the point halfway down the screen and DIGIT_GAP / 2 from
         // the screen center.
-        uint8_t x_off = left
-            ? SCREEN_CENTER_X - IMG_WIDTH - (DIGIT_GAP / 2)
-            : SCREEN_CENTER_X + (DIGIT_GAP / 2);
+        uint8_t x_off = left ? SCREEN_CENTER_X - IMG_WIDTH - (DIGIT_GAP / 2)
+                             : SCREEN_CENTER_X + (DIGIT_GAP / 2);
         uint8_t y_off = SCREEN_CENTER_Y - (IMG_HEIGHT / 2);
         pt[0] += x_off;
         pt[1] += y_off;
@@ -198,8 +203,11 @@ static void clear_screen(struct hand_t *hand) {
 }
 
 // Find the minimum bounding box for `bitmap`.
-static void find_bounding(const uint8_t *bitmap, uint8_t *x, uint8_t *y,
-                          uint8_t *width, uint8_t *height) {
+static void find_bounding(const uint8_t *bitmap,
+                          uint8_t *x,
+                          uint8_t *y,
+                          uint8_t *width,
+                          uint8_t *height) {
     uint8_t min_x = 0;
     uint8_t min_y = 0;
     uint8_t max_x = 255;
@@ -210,10 +218,18 @@ static void find_bounding(const uint8_t *bitmap, uint8_t *x, uint8_t *y,
             if (bitRead(bitmap[idx], bit)) {
                 uint8_t x = 0, y = 0;
                 bit2xy(bit, idx, x, y);
-                if (x < min_x) { min_x = x; }
-                if (y < min_y) { min_y = y; }
-                if (x > max_x) { max_x = x; }
-                if (y > max_y) { max_y = y; }
+                if (x < min_x) {
+                    min_x = x;
+                }
+                if (y < min_y) {
+                    min_y = y;
+                }
+                if (x > max_x) {
+                    max_x = x;
+                }
+                if (y > max_y) {
+                    max_y = y;
+                }
             }
         }
     }
@@ -260,18 +276,18 @@ static void set_sec(struct hand_t *hand, uint8_t sec) {
             Point pt_end;
             memcpy(pt_end, pt, sizeof(Point));
             switch (edge) {
-                case TOP:
-                    pt_end[1] += SEC_THICKNESS_OFF;
-                    break;
-                case BOTTOM:
-                    pt_end[1] -= SEC_THICKNESS_OFF;
-                    break;
-                case RIGHT:
-                    pt_end[0] -= SEC_THICKNESS_OFF;
-                    break;
-                case LEFT:
-                    pt_end[0] += SEC_THICKNESS_OFF;
-                    break;
+            case TOP:
+                pt_end[1] += SEC_THICKNESS_OFF;
+                break;
+            case BOTTOM:
+                pt_end[1] -= SEC_THICKNESS_OFF;
+                break;
+            case RIGHT:
+                pt_end[0] -= SEC_THICKNESS_OFF;
+                break;
+            case LEFT:
+                pt_end[0] += SEC_THICKNESS_OFF;
+                break;
             }
 
             hand->screen.drawLine(pt[0], pt[1], pt_end[0], pt_end[1], SEC_FG);
@@ -291,22 +307,22 @@ static enum Edge draw_sec(Point pt, uint8_t sec, double angle) {
     double y;
     enum Edge edge = EDGE_OF_ANGLE(angle);
     switch (edge) {
-        case TOP:
-            x = (SCREEN_WIDTH_R / 2) * tan(angle);
-            y = (SCREEN_HEIGHT_R / 2) - SEC_MARGIN_TOP_R;
-            break;
-        case BOTTOM:
-            x = -(SCREEN_WIDTH_R / 2) * tan(angle);
-            y = -(SCREEN_HEIGHT_R / 2) + SEC_MARGIN_BOTTOM_R;
-            break;
-        case RIGHT:
-            x = (SCREEN_WIDTH_R / 2) - SEC_MARGIN_RIGHT_R;
-            y = (SCREEN_HEIGHT_R / 2) * tan((M_PI / 2) - angle);
-            break;
-        case LEFT:
-            x = -(SCREEN_WIDTH_R / 2) + SEC_MARGIN_LEFT_R;
-            y = -(SCREEN_HEIGHT_R / 2) * tan((M_PI / 2) - angle);
-            break;
+    case TOP:
+        x = (SCREEN_WIDTH_R / 2) * tan(angle);
+        y = (SCREEN_HEIGHT_R / 2) - SEC_MARGIN_TOP_R;
+        break;
+    case BOTTOM:
+        x = -(SCREEN_WIDTH_R / 2) * tan(angle);
+        y = -(SCREEN_HEIGHT_R / 2) + SEC_MARGIN_BOTTOM_R;
+        break;
+    case RIGHT:
+        x = (SCREEN_WIDTH_R / 2) - SEC_MARGIN_RIGHT_R;
+        y = (SCREEN_HEIGHT_R / 2) * tan((M_PI / 2) - angle);
+        break;
+    case LEFT:
+        x = -(SCREEN_WIDTH_R / 2) + SEC_MARGIN_LEFT_R;
+        y = -(SCREEN_HEIGHT_R / 2) * tan((M_PI / 2) - angle);
+        break;
     }
 
     // Adjust the coordinate reference frame ((0, 0) is the top left of the

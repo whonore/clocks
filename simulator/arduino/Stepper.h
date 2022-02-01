@@ -4,14 +4,16 @@
 #include <arduino.h>
 
 class Stepper {
-    public:
-        Stepper(int UNUSED(number_of_steps),
-                int UNUSED(motor_pin_1), int UNUSED(motor_pin_2),
-                int UNUSED(motor_pin_3), int UNUSED(motor_pin4)) { }
+  public:
+    Stepper(int UNUSED(number_of_steps),
+            int UNUSED(motor_pin_1),
+            int UNUSED(motor_pin_2),
+            int UNUSED(motor_pin_3),
+            int UNUSED(motor_pin4)) {}
 
-        void setSpeed(long UNUSED(whatSpeed)) { }
+    void setSpeed(long UNUSED(whatSpeed)) {}
 
-        void step(int UNUSED(number_of_steps)) { }
+    void step(int UNUSED(number_of_steps)) {}
 };
 
 #endif /* STEPPER_H */

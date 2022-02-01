@@ -30,7 +30,7 @@ static ticks_t total_ticks = 0;
 
 // The time offset to add to the Arduino's internal clock. Set by pressing the
 // minute and hour buttons.
-static struct clock_time_t off = { .secs = 0, .mins = 0, .hours = 0 };
+static struct clock_time_t off = {.secs = 0, .mins = 0, .hours = 0};
 
 void setup() {
 #if DEBUG
@@ -40,11 +40,12 @@ void setup() {
 
     const ring_t rings[] = {secs, mins, hours};
 #if NEOPIXEL
-    const color_t colors[] = {
-        SEC_COLOR1, SEC_COLOR2,
-        MIN_COLOR1, MIN_COLOR2,
-        HOUR_COLOR1, HOUR_COLOR2
-    };
+    const color_t colors[] = {SEC_COLOR1,
+                              SEC_COLOR2,
+                              MIN_COLOR1,
+                              MIN_COLOR2,
+                              HOUR_COLOR1,
+                              HOUR_COLOR2};
     leds.begin();
     leds.show();
 #endif
@@ -74,8 +75,8 @@ void loop() {
     // Compute the time difference in TICK_UNIT since the last loop, accounting
     // for overflow.
     ticks_t ticks = TICK();
-    ticks_t ellapsed =
-        prev_ticks < ticks ? ticks - prev_ticks : ticks + (TICKS_MAX - prev_ticks);
+    ticks_t ellapsed = prev_ticks < ticks ? ticks - prev_ticks
+                                          : ticks + (TICKS_MAX - prev_ticks);
 
     // Check if a second has passed.
     bool at_second = (TICKS_PER_SEC <= ellapsed);
@@ -136,13 +137,13 @@ static void ticksToTime(struct clock_time_t *time, ticks_t ticks) {
 // Update the ring segment LEDs.
 static void dispTimes(byte sec, byte min, byte hour) {
 #if NEOPIXEL
-        leds.clear();
+    leds.clear();
 #endif
-        dispTime(&secs, sec);
-        dispTime(&mins, min);
-        dispTime(&hours, hour);
+    dispTime(&secs, sec);
+    dispTime(&mins, min);
+    dispTime(&hours, hour);
 #if NEOPIXEL
-        leds.show();
+    leds.show();
 #endif
 }
 
@@ -165,7 +166,9 @@ static void dispTime(const ring_t *ring, byte val) {
 
 #if NEOPIXEL
 // Compute the color for each segment by interpolating from `start` to `end`.
-static void setColors(const struct ring_t *ring, const color_t start, const color_t end) {
+static void setColors(const struct ring_t *ring,
+                      const color_t start,
+                      const color_t end) {
     for (byte c = 0; c < 3; c++) {
         int step = abs(start[c] - end[c]) / (ring->nsegs - 1);
         step *= start[c] < end[c] ? 1 : -1;
@@ -188,7 +191,8 @@ static void startup() {
 
     // Shift a mask of `nlights` bits to the left.
     for (byte i = 1; i <= NSECS + NMINS + NHOURS; i++) {
-        uint32_t time = i < nlights ? mask >> (nlights - i) : mask << (i - nlights);
+        uint32_t time =
+          i < nlights ? mask >> (nlights - i) : mask << (i - nlights);
         dispTimes(time & sec_mask,
                   (time >> NSECS) & min_mask,
                   (time >> (NSECS + NMINS)) & hour_mask);
