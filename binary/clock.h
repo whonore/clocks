@@ -11,14 +11,6 @@
 #include <Adafruit_NeoPixel.h>
 #endif
 
-#if DEBUG
-#define DEBUG_SZ 256
-static char debug[DEBUG_SZ];
-#define DPRINTF(...) snprintf(debug, DEBUG_SZ, __VA_ARGS__); Serial.print(debug)
-#else
-#define DPRINTF(...) do {} while (0)
-#endif
-
 // Time
 #if TICK_UNIT == USECS
 #define TICK() micros()
