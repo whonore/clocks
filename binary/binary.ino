@@ -1,17 +1,23 @@
+#if REALTIME
+#  include <DS3231.h>
+#endif
+
 #include "clock.h"
 
 // The state of each ring.
 #if NEOPIXEL
-static const ring_t secs = RING(NSECS, 0);
-static const ring_t mins = RING(NMINS, NSECS);
-static const ring_t hours = RING(NHOURS, NSECS + NMINS);
+static const struct ring_t secs = RING(NSECS, 0);
+static const struct ring_t mins = RING(NMINS, NSECS);
+static const struct ring_t hours = RING(NHOURS, NSECS + NMINS);
 Adafruit_NeoPixel leds(NSECS + NMINS + NHOURS, 2, NEO_RGB + NEO_KHZ800);
 #else
-static constexpr ring_t secs = RING(((pin_t[NSECS]) {A0, A1, A2, A3, A4, A5}));
+static constexpr struct ring_t secs =
+  RING(((pin_t[NSECS]) {A0, A1, A2, A3, A4, A5}));
 static_assert(secs.nsegs == NSECS, "Wrong number of secs");
-static constexpr ring_t mins = RING(((pin_t[NMINS]) {2, 3, 4, 5, 6, 7}));
+static constexpr struct ring_t mins = RING(((pin_t[NMINS]) {2, 3, 4, 5, 6, 7}));
 static_assert(mins.nsegs == NMINS, "Wrong number of mins");
-static constexpr ring_t hours = RING(((pin_t[NHOURS]) {8, 9, 10, 11, 12}));
+static constexpr struct ring_t hours =
+  RING(((pin_t[NHOURS]) {8, 9, 10, 11, 12}));
 static_assert(hours.nsegs == NHOURS, "Wrong number of hours");
 #endif
 
@@ -19,14 +25,19 @@ static_assert(hours.nsegs == NHOURS, "Wrong number of hours");
 static struct button_t inc_hour = {.pin = 0, .active = LOW, .state = HIGH};
 static struct button_t inc_min = {.pin = 13, .active = HIGH, .state = LOW};
 
+#if REALTIME
+static DS3231 rtc(SDA, SCL);
+static int8_t prev_sec = -1;
+#else
 // The previous (since the last loop) and total (modulo TICKS_PER_DAY) number
 // of ticks.
 static ticks_t prev_ticks = 0;
 static ticks_t total_ticks = 0;
+#endif
 
 // The time offset to add to the Arduino's internal clock. Set by pressing the
 // minute and hour buttons.
-static struct clock_time_t off = {.secs = 0, .mins = 0, .hours = 0};
+static struct clock_time_t off = {.sec = 0, .min = 0, .hour = 0};
 
 void setup() {
 #if DEBUG
@@ -34,7 +45,7 @@ void setup() {
     while (!Serial) {}
 #endif
 
-    const ring_t rings[] = {secs, mins, hours};
+    const struct ring_t rings[] = {secs, mins, hours};
 #if NEOPIXEL
     const color_t colors[] = {SEC_COLOR1,
                               SEC_COLOR2,
@@ -61,6 +72,11 @@ void setup() {
     pinMode(inc_hour.pin, INPUT);
     pinMode(inc_min.pin, INPUT);
 
+#if REALTIME
+    // Initialize the realtime clock.
+    rtc.begin();
+#endif
+
 #if STARTUP
     // Display the startup animation.
     startup();
@@ -68,14 +84,18 @@ void setup() {
 }
 
 void loop() {
+#if REALTIME
+    Time rtime = rtc.getTime();
+    bool at_second = rtime.sec != prev_sec;
+#else
     // Compute the time difference in TICK_UNIT since the last loop, accounting
     // for overflow.
     ticks_t ticks = TICK();
     ticks_t ellapsed = prev_ticks < ticks ? ticks - prev_ticks
                                           : ticks + (TICKS_MAX - prev_ticks);
-
     // Check if a second has passed.
     bool at_second = (TICKS_PER_SEC <= ellapsed);
+#endif
 
     // Check if either button was pressed.
     bool hour_pressed = pressed(&inc_hour);
@@ -84,40 +104,64 @@ void loop() {
     // Increment the hour.
     if (hour_pressed) {
         DPRINTF("Hour+\n");
-        off.hours += 1;
+        off.hour += 1;
         delay(100);
     }
 
     // Increment the minute.
     if (min_pressed) {
         DPRINTF("Minute+\n");
-        off.mins += 1;
+        off.min += 1;
         delay(50);
     }
 
     // At least a second has passed so update the current time.
     if (at_second) {
+#if REALTIME
+        prev_sec = rtime.sec;
+#else
         total_ticks = (total_ticks + ellapsed) % TICKS_PER_DAY;
         prev_ticks = ticks;
+#endif
     }
 
     // Update the display.
     if (at_second || hour_pressed || min_pressed) {
-        struct clock_time_t time = off;
+        struct clock_time_t time;
+#if REALTIME
+        time.sec = rtime.sec;
+        time.min = rtime.min;
+        time.hour = rtime.hour;
+#else
         ticksToTime(&time, total_ticks);
-        dispTimes(time.secs, time.mins, time.hours);
-        DPRINTF("H:%u\tM:%u\tS:%u\n", time.hours, time.mins, time.secs);
+#endif
+        offsetTime(&time, &off);
+        dispTimes(time.sec, time.min, time.hour);
+        DPRINTF("H:%u\tM:%u\tS:%u\n", time.hour, time.min, time.sec);
     }
 }
 
-// Convert `ticks` to seconds, minutes, and hours and add them to `time`.
+#if !REALTIME
+// Convert `ticks` to seconds, minutes, and hours.
 static void ticksToTime(struct clock_time_t *time, ticks_t ticks) {
-    uint32_t sec = time->secs + (ticks / TICKS_PER_SEC);
-    uint32_t min = time->mins + (sec / SEC_MAX);
-    uint32_t hour = time->hours + (min / MIN_MAX);
-    time->hours = hour % HOUR_MAX;
-    time->mins = min % MIN_MAX;
-    time->secs = sec % SEC_MAX;
+    uint32_t sec = ticks / TICKS_PER_SEC;
+    uint32_t min = sec / SEC_MAX;
+    uint32_t hour = min / MIN_MAX;
+    time->sec = sec % SEC_MAX;
+    time->min = min % MIN_MAX;
+    time->hour = hour % HOUR_MAX;
+}
+#endif
+
+// Add `time` and `off`, storing the result in `time.
+static void offsetTime(struct clock_time_t *time,
+                       const struct clock_time_t *off) {
+    uint32_t sec = time->sec + off->sec;
+    uint32_t min = time->min + off->min + (sec / SEC_MAX);
+    uint32_t hour = time->hour + off->hour + (min / MIN_MAX);
+    time->sec = sec % SEC_MAX;
+    time->min = min % MIN_MAX;
+    time->hour = hour % HOUR_MAX;
 }
 
 // Update the ring segment LEDs.
@@ -134,7 +178,7 @@ static void dispTimes(byte sec, byte min, byte hour) {
 }
 
 // Update a single ring's LEDs.
-static void dispTime(const ring_t *ring, byte val) {
+static void dispTime(const struct ring_t *ring, byte val) {
     // Turn on or off each LED based on the corresponding bit of `val`.
     for (byte i = 0; i < ring->nsegs; i++) {
 #if NEOPIXEL

@@ -12,27 +12,29 @@
 #endif
 
 // Time
-#if TICK_UNIT == USECS
-#  define TICK() micros()
-#elif TICK_UNIT == MSECS
-#  define TICK() millis()
-#else
-#  error "TICK_UNIT must be USECS or MSECS"
-#endif
+#if !REALTIME
+#  if TICK_UNIT == USECS
+#    define TICK() micros()
+#  elif TICK_UNIT == MSECS
+#    define TICK() millis()
+#  else
+#    error "TICK_UNIT must be USECS or MSECS"
+#  endif
 
 typedef uint64_t ticks_t;
-#define TICKS_MAX         ((ticks_t) ((uint32_t) (-1)))
-#define CLOCK_DRIFT_TICKS (CLOCK_DRIFT_PER_MIL / (1000000 / TICK_UNIT))
-#define TICKS_PER_SEC     ((ticks_t) TICK_UNIT + CLOCK_DRIFT_TICKS)
-#define TICKS_PER_DAY     ((ticks_t) TICKS_PER_SEC * SEC_MAX * MIN_MAX * HOUR_MAX)
+#  define TICKS_MAX         ((ticks_t) ((uint32_t) (-1)))
+#  define CLOCK_DRIFT_TICKS (CLOCK_DRIFT_PER_MIL / (1000000 / TICK_UNIT))
+#  define TICKS_PER_SEC     ((ticks_t) TICK_UNIT + CLOCK_DRIFT_TICKS)
+#  define TICKS_PER_DAY     ((ticks_t) TICKS_PER_SEC * SEC_MAX * MIN_MAX * HOUR_MAX)
 static_assert(TICKS_PER_DAY / TICKS_PER_SEC
                 == (ticks_t) SEC_MAX * MIN_MAX * HOUR_MAX,
               "Ticks overflowed");
+#endif
 
 struct clock_time_t {
-    byte secs;
-    byte mins;
-    byte hours;
+    byte sec;
+    byte min;
+    byte hour;
 };
 
 #define NSECS  6

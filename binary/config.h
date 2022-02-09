@@ -4,23 +4,29 @@
 #include "local.h"
 
 // Config
-#ifndef NEOPIXEL
-#  define NEOPIXEL 1
-#endif
-
 #ifndef DEBUG
 #  define DEBUG 0
+#endif
+
+#ifndef NEOPIXEL
+#  define NEOPIXEL 1
 #endif
 
 #ifndef STARTUP
 #  define STARTUP 1
 #endif
 
-#define USECS 1000000
-#define MSECS 1000
+#ifndef REALTIME
+#  define REALTIME 0
+#endif
 
-#ifndef TICK_UNIT
-#  define TICK_UNIT USECS
+#if !REALTIME
+#  define USECS 1000000
+#  define MSECS 1000
+
+#  ifndef TICK_UNIT
+#    define TICK_UNIT USECS
+#  endif
 #endif
 
 // How far from true TICK_UNIT the clock is.
