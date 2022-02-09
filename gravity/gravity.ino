@@ -10,9 +10,9 @@
 
 // clang-format off
 //     CS  DC  MOSI SCLK RST MOT1 MOT2 MOT3 MOT4 ZERO ZOFF       MAX
-static hand_t hand_min = \
+static struct hand_t hand_min = \
   HAND(16, 15, 18,  17,  14, 26,  27,  28,  29,  52,  MIN_ZOFF,  MIN_MAX);
-static hand_t hand_hour = \
+static struct hand_t hand_hour = \
   HAND(4,  5,  2,   3,   6,  22,  23,  24,  25,  53,  HOUR_ZOFF, HOUR_MAX);
 // clang-format on
 #if DISPLAY_SEC
@@ -22,9 +22,12 @@ static int8_t last_sec = -1;
 static DS3231 rtc(SDA, SCL);
 
 void setup(void) {
+#if DEBUG
     Serial.begin(9600);
+    while (!Serial) {}
+#endif
 
-    hand_t *HANDS[] = {&hand_min, &hand_hour};
+    struct hand_t *HANDS[] = {&hand_min, &hand_hour};
     for (uint8_t i = 0; i < ARRAY_LEN(HANDS); i++) {
         HANDS[i]->screen.begin();
         HANDS[i]->screen.setRotation(ROTATE);

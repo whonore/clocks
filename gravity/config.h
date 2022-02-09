@@ -3,6 +3,10 @@
 
 #include "local.h"
 
+#ifndef DEBUG
+#  define DEBUG 0
+#endif
+
 // The number of steps to offset from the zero switch.
 #ifndef MIN_ZOFF
 #  error "Must define MIN_ZOFF in local.h."
