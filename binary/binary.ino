@@ -16,12 +16,8 @@ static_assert(hours.nsegs == NHOURS, "Wrong number of hours");
 #endif
 
 // The buttons to manually increment the minute and hour.
-static const pin_t inc_hour = 0;
-static const pin_t inc_min = 13;
-
-// The previous voltage state read for each button.
-static byte last_hour_st = HIGH;
-static byte last_min_st = LOW;
+static struct button_t inc_hour = {.pin = 0, .active = LOW, .state = HIGH};
+static struct button_t inc_min = {.pin = 13, .active = HIGH, .state = LOW};
 
 // The previous (since the last loop) and total (modulo TICKS_PER_DAY) number
 // of ticks.
@@ -62,8 +58,8 @@ void setup() {
     }
 
     // Initialize the button pins.
-    pinMode(inc_hour, INPUT);
-    pinMode(inc_min, INPUT);
+    pinMode(inc_hour.pin, INPUT);
+    pinMode(inc_min.pin, INPUT);
 
 #if STARTUP
     // Display the startup animation.
@@ -82,8 +78,8 @@ void loop() {
     bool at_second = (TICKS_PER_SEC <= ellapsed);
 
     // Check if either button was pressed.
-    bool hour_pressed = pressed(inc_hour, &last_hour_st, LOW);
-    bool min_pressed = pressed(inc_min, &last_min_st, HIGH);
+    bool hour_pressed = pressed(&inc_hour);
+    bool min_pressed = pressed(&inc_min);
 
     // Increment the hour.
     if (hour_pressed) {
@@ -112,16 +108,6 @@ void loop() {
         dispTimes(time.secs, time.mins, time.hours);
         DPRINTF("H:%u\tM:%u\tS:%u\n", time.hours, time.mins, time.secs);
     }
-}
-
-// Was `button` pressed?
-// True if its state matches `active` and differs from `old`.
-// Also stores the new state in `old`.
-static bool pressed(pin_t button, byte *old, byte active) {
-    byte st = digitalRead(button);
-    byte st_old = *old;
-    *old = st;
-    return (st == active && st_old != active);
 }
 
 // Convert `ticks` to seconds, minutes, and hours and add them to `time`.
