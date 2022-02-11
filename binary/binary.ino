@@ -1,8 +1,9 @@
+#include "clock.h"
+
+// Must be after including clock.h
 #if REALTIME
 #  include <DS3231.h>
 #endif
-
-#include "clock.h"
 
 // The state of each ring.
 #if NEOPIXEL
