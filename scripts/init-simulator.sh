@@ -13,6 +13,6 @@ if [ ! -d "$simulator" ]; then
     mkdir "$simulator"
 fi
 
-ln -srf "$TOP"/simulator/arduino "$simulator"
-ln -srf "$TOP"/simulator/ino2c.py "$simulator"
+ln -srf "$TOP"/simulator/arduino/ "$simulator"
 ln -srf "$TOP"/simulator/Makefile "$simulator"
+ln -srf "$TOP"/scripts/ "$simulator"

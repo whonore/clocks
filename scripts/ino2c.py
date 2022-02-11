@@ -24,7 +24,7 @@ def add_header(ino: str, c: str, incls: List[str], decls: List[str]) -> None:
     with open(ino, "r", encoding="utf8") as f:
         txt = f.read()
     with open(c, "w", encoding="utf8") as f:
-        txt = header + "\n\n" + txt
+        txt = f"/* !!!ino2c!!! */\n{header}\n/* !!!ino2c!!! */\n{txt}"
         txt = txt.replace('#include "', '#include "../')
         f.write(txt)
 

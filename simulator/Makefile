@@ -1,7 +1,8 @@
-CCOPTS := -Wall -Wextra -Os -Iarduino
+CCOPTS := -Wall -Wextra -Os
+CCINC := -Iarduino
 CCLINK := -lpthread -lncurses
 ifneq ($(DEBUG),)
-CCOPTS += -DDEBUG=$(DEBUG)
+CCDEF := -DDEBUG=$(DEBUG)
 endif
 
 -include Makefile.inc
@@ -15,10 +16,12 @@ HFILES := $(wildcard ../*.h)
 all: $(CLOCK)
 
 $(CLOCK): $(CLOCK).cpp $(ARDUINO) $(HFILES)
-	g++ $(CCOPTS) -o $@ $< arduino/arduino.cpp $(CCLINK)
+	g++ $(CCOPTS) $(CCINC) $(CCDEF) -o $@ $< arduino/arduino.cpp $(CCLINK)
 
-%.cpp: ../%.ino ino2c.py
-	./ino2c.py $< $@
+%.cpp: ../%.ino scripts/ino2c.py scripts/expand-if.sh scripts/remove-unused-decl.py
+	scripts/ino2c.py $< $@
+	env CPP_INC="$(CCINC)" CPP_OPT_EXTRA="$(CCDEF)" scripts/expand-if.sh $@ $@
+	scripts/remove-unused-decl.py $@
 
 clean:
 	rm -f $(CLOCK) $(CLOCK).cpp
