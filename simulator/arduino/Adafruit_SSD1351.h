@@ -17,7 +17,7 @@ static unsigned int nwindows = 0;
 
 class Adafruit_SSD1351 {
   private:
-    WINDOW *win;
+    WINDOW *win = NULL;
     uint16_t width;
     uint16_t height;
     uint8_t rotation = 0;
@@ -51,6 +51,7 @@ class Adafruit_SSD1351 {
             break;
         }
 
+        // cppcheck-suppress shadowVariable
         int width, height;
         getmaxyx(this->win, height, width);
         if ((x >= width) || (y >= height)) {
@@ -158,7 +159,7 @@ class Adafruit_SSD1351 {
 
     void drawBitmap(int16_t x,
                     int16_t y,
-                    uint8_t *bitmap,
+                    const uint8_t *bitmap,
                     int16_t w,
                     int16_t h,
                     uint16_t color,
@@ -182,7 +183,7 @@ class Adafruit_SSD1351 {
 
     void drawBitmap(int16_t x,
                     int16_t y,
-                    uint8_t *bitmap,
+                    const uint8_t *bitmap,
                     int16_t w,
                     int16_t h,
                     uint16_t color) {

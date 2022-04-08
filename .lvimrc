@@ -1,5 +1,9 @@
 let s:include = g:localvimrc_script_dir . '/simulator/arduino'
 let s:arduino = s:include . '/arduino.h'
 let b:ale_cpp_cc_options = '-std=c++14 -Wall -Wextra -include ' . s:arduino . ' -I' . s:include
-let b:ale_cpp_cppcheck_options = '--enable=warning,style,performance,portability --include=' . s:arduino . ' -I' . s:include
-let b:ale_linters_ignore = ['clangcheck', 'clangtidy']
+let b:ale_cpp_cppcheck_options =
+  \ '--std=c++14 language=c++'
+  \ . ' --enable=warning,style,performance,portability --include=' . s:arduino
+  \ . ' -I' . s:include
+  \ . ' --inline-suppr'
+let b:ale_linters = ['cc', 'cppcheck']

@@ -176,8 +176,10 @@ static void draw_digit(uint8_t *bitmap,
         pt[1] = round(y_rot);
 
         // Draw `SCALE` pixels per point in each axis.
+        // cppcheck-suppress shadowVariable
         for (uint8_t x_off = 0; x_off < SCALE; x_off++) {
             pt[0] += x_off;
+            // cppcheck-suppress shadowVariable
             for (uint8_t y_off = 0; y_off < SCALE; y_off++) {
                 pt[1] += y_off;
                 draw_point(bitmap, pt);
@@ -219,6 +221,7 @@ static void find_bounding(const uint8_t *bitmap,
     for (uint16_t idx = 0; idx < BITMAP_SZ; idx++) {
         for (int8_t bit = 7; bit >= 0; bit--) {
             if (bitRead(bitmap[idx], bit)) {
+                // cppcheck-suppress shadowArgument
                 uint8_t x = 0, y = 0;
                 bit2xy(bit, idx, x, y);
                 if (x < min_x) {

@@ -17,7 +17,7 @@ enum {
 
 class TimerInterrupt {
   public:
-    TimerInterrupt(uint8_t UNUSED(timerNo)) {}
+    explicit TimerInterrupt(uint8_t UNUSED(timerNo)) {}
 
     void init() {}
 
