@@ -1,4 +1,4 @@
-CCOPTS := -Wall -Wextra -Os
+CCOPTS := -Wall -Wextra -Werror -Os
 CCINC := -Iarduino
 CCLINK := -lpthread -lncurses
 ifneq ($(DEBUG),)
