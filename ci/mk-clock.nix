@@ -38,6 +38,7 @@
       configurePhase = ''
         runHook preConfigure
 
+        arduino-cli config dump
         ARDUINO_DATA=$(arduino-cli config dump | grep data | cut -d' ' -f4)
         mkdir -p $ARDUINO_DATA/packages
         echo '{"libraries":[]}' > $ARDUINO_DATA/library_index.json
