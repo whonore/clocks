@@ -20,6 +20,10 @@ FORMATOPTS := --dry-run -Werror
 
 -include Makefile.inc
 
+ifneq ($(CCDEF_EXTRA),)
+CCDEF += $(CCDEF_EXTRA)
+endif
+
 ARDUINO := $(wildcard arduino/*.[ch] arduino/*.cpp)
 CLOCK := $(patsubst ../%.ino,%,$(wildcard ../*.ino))
 HFILES := $(wildcard ../*.h)
