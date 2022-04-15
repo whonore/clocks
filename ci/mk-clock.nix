@@ -95,7 +95,7 @@
           --libraries $ARDUINO_LIBS \
           .
 
-        make -C simulator
+        env CCDEF_EXTRA="${lib.concatStringsSep " " define-flags}" make -C simulator
 
         runHook postBuild
       '';
