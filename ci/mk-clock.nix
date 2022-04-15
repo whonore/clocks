@@ -85,7 +85,7 @@
         runHook preBuild
 
         foundMakefile=1
-        CCDEF_EXTRA="${lib.concatStringsSep " " define-flags}"
+        export CCDEF_EXTRA="${lib.concatStringsSep " " define-flags}"
         cd clocks/${name}
 
         echo "${clock.platform}:${board} ${build-flags}"
