@@ -95,7 +95,9 @@
           --libraries $ARDUINO_LIBS \
           .
 
+        ls
         ls simulator
+        ls simulator/scripts
         cat simulator/Makefile
         make -C simulator
 
