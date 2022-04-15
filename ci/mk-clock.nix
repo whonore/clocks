@@ -95,6 +95,8 @@
           --libraries $ARDUINO_LIBS \
           .
 
+        ls simulator
+        cat simulator/Makefile
         make -C simulator
 
         runHook postBuild
