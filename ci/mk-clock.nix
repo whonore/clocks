@@ -7,6 +7,7 @@
   fetchurl,
   lib,
   ncurses, # for tput
+  python3,
   stdenv,
 }: name: clock: let
   libs = map (lib: builtins.getAttr lib arduino-libs) clock.libs;
@@ -30,10 +31,12 @@
     stdenv.mkDerivation {
       name = "${name}-${board}-${catFeatures features}";
       src = ./..;
-      buildInputs = [arduino-cli ncurses] ++ libs;
+      buildInputs = [arduino-cli ncurses python3] ++ libs;
       checkInputs = [clang-tools cppcheck];
 
       doCheck = true;
+
+      postPatch = "patchShebangs scripts";
 
       configurePhase = ''
         runHook preConfigure
