@@ -85,6 +85,7 @@
         runHook preBuild
 
         foundMakefile=1
+        CCDEF_EXTRA="${lib.concatStringsSep " " define-flags}"
         cd clocks/${name}
 
         echo "${clock.platform}:${board} ${build-flags}"
@@ -95,7 +96,7 @@
           --libraries $ARDUINO_LIBS \
           .
 
-        env CCDEF_EXTRA="${lib.concatStringsSep " " define-flags}" make -C simulator
+        make -C simulator
 
         runHook postBuild
       '';
