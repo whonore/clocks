@@ -24,9 +24,9 @@
     board,
     features,
   }: let
-    build-flags =
-      lib.concatStringsSep " "
-      (lib.mapAttrsToList (feat: val: "-D${feat}=${toString val}") features);
+    define-flags = lib.mapAttrsToList (def: val: "-D${def}=${val}") clock.defines;
+    feature-flags = lib.mapAttrsToList (feat: val: "-D${feat}=${toString val}") features;
+    build-flags = lib.concatStringsSep " " (define-flags ++ feature-flags);
   in
     stdenv.mkDerivation {
       name = "${name}-${board}-${catFeatures features}";
@@ -95,10 +95,6 @@
           --libraries $ARDUINO_LIBS \
           .
 
-        ls
-        ls simulator
-        ls simulator/scripts
-        cat simulator/Makefile
         make -C simulator
 
         runHook postBuild

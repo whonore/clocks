@@ -6,6 +6,7 @@ with pkgs; let
       boards = ["uno" "mega"];
       libs = ["Adafruit_NeoPixel" "DS3231"];
       features = ["NEOPIXEL" "REALTIME" "STARTUP"];
+      defines = {};
     };
     gravity = {
       platform = "arduino:avr";
@@ -22,6 +23,10 @@ with pkgs; let
         "TimerInterrupt"
       ];
       features = ["DISPLAY_SEC"];
+      defines = {
+        "MIN_ZOFF" = "0";
+        "HOUR_ZOFF" = "0";
+      };
     };
   };
   avr = import ./avr.nix {inherit fetchzip;};
