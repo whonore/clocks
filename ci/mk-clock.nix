@@ -38,26 +38,31 @@
       configurePhase = ''
         runHook preConfigure
 
-        arduino-cli config dump
-        ARDUINO_DATA=$(arduino-cli config dump | grep data | cut -d' ' -f4)
-        mkdir -p $ARDUINO_DATA/packages
-        echo '{"libraries":[]}' > $ARDUINO_DATA/library_index.json
-        echo '{"packages":[]}' > $ARDUINO_DATA/package_index.json
+        ARDUINO_HOME=$(mktemp --directory)
+        ARDUINO_PKGS=$ARDUINO_HOME/packages
+        ARDUINO_LIBS=$ARDUINO_HOME/libraries
+        mkdir -p $ARDUINO_PKGS
+        mkdir -p $ARDUINO_LIBS
+
+        CONFIG=$ARDUINO_HOME/arduino-cli.yaml
+        arduino-cli config init --dest-dir $ARDUINO_HOME
+        arduino-cli config set directories.data $ARDUINO_HOME --config-file $CONFIG
+        arduino-cli config set directories.user $ARDUINO_LIBS --config-file $CONFIG
+
+        echo '{"libraries":[]}' > $ARDUINO_HOME/library_index.json
+        echo '{"packages":[]}' > $ARDUINO_HOME/package_index.json
 
         # Copied from pkgs/development/embedded/arduino/arduino-core/default.nix
         pkg_src=(${toString (builtins.attrValues avr)})
         pkg_dst=(${toString (builtins.attrNames avr)})
         while [[ "''${#pkg_src[@]}" -ne 0 ]]; do
           file_src=''${pkg_src[0]}
-          file_dst=$ARDUINO_DATA/packages/''${pkg_dst[0]}
+          file_dst=$ARDUINO_PKGS/''${pkg_dst[0]}
           pkg_src=(''${pkg_src[@]:1})
           pkg_dst=(''${pkg_dst[@]:1})
           mkdir -p $(dirname $file_dst)
           ln -sT $file_src $file_dst
         done
-
-        ARDUINO_LIBS=$(arduino-cli config dump | grep user | cut -d' ' -f4)/libraries
-        mkdir -p $ARDUINO_LIBS
 
         lib_src=(${toString libs})
         lib_dst=(${toString clock.libs})
@@ -83,6 +88,8 @@
         arduino-cli compile \
           -b ${clock.platform}:${board} \
           --build-property "build.extra_flags=${build-flags}" \
+          --config-file $CONFIG \
+          --libraries $ARDUINO_LIBS \
           .
 
         make -C simulator
@@ -102,9 +109,9 @@
       '';
     };
 in
-  map ({
+  builtins.listToAttrs (map ({
       board,
       features,
     } @ args:
       lib.nameValuePair "${board}-${catFeatures features}" (mkClockForBoard args))
-  matrix
+  matrix)
