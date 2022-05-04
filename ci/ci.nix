@@ -1,5 +1,13 @@
 {pkgs ? import <nixpkgs> {}}:
 with pkgs; let
+  gitignoreSrc = pkgs.fetchFromGitHub {
+    owner = "hercules-ci";
+    repo = "gitignore.nix";
+    rev = "bff2832ec341cf30acb3a4d3e2e7f1f7b590116a";
+    sha256 = "sha256-kekOlTlu45vuK2L9nq8iVN17V3sB0WWPqTTW3a2SQG0=";
+  };
+  inherit (import gitignoreSrc {inherit (pkgs) lib;}) gitignoreSource;
+
   clocks = {
     binary = {
       platform = "arduino:avr";
@@ -31,7 +39,7 @@ with pkgs; let
   };
   avr = import ./avr.nix {inherit fetchzip;};
   arduino-libs = import ./arduino-libs.nix {inherit fetchFromGitHub fetchzip;};
-  mkClock = callPackage ./mk-clock.nix {inherit arduino-libs avr;};
+  mkClock = callPackage ./mk-clock.nix {inherit arduino-libs avr gitignoreSource;};
 
   allDrvs = m:
     if lib.isAttrs m && !lib.isDerivation m

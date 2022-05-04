@@ -19,4 +19,4 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixpkgs-unstable
       - name: Build sketches
-        run: nix-build -j auto --cores 0 ci/ci.nix --attr all
+        run: nix build --verbose --print-build-logs --cores 0 --max-jobs auto -f ci/ci.nix all

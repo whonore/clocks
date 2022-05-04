@@ -5,6 +5,7 @@
   clang-tools,
   cppcheck,
   fetchurl,
+  gitignoreSource,
   lib,
   ncurses, # for tput
   python3,
@@ -30,7 +31,7 @@
   in
     stdenv.mkDerivation {
       name = "${name}-${board}-${catFeatures features}";
-      src = ./..;
+      src = gitignoreSource ./..;
       buildInputs = [arduino-cli ncurses python3] ++ libs;
       checkInputs = [clang-tools cppcheck];
 

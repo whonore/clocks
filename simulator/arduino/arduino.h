@@ -1,6 +1,7 @@
 #ifndef ARDUINO_H
 #define ARDUINO_H
 
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
