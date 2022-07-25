@@ -6,20 +6,20 @@
 // Hack to compute the correct file name for the current resolution.
 // See:
 // https://stackoverflow.com/questions/41766131/c-preprocessor-to-compute-product-specific-include
-#define STR2(X)     #X
-#define STR(X)      STR2(X)
-#define FONT(digit) STR(fonts/digit-RESOLUTION.h)
+#define STR2(X)         #X
+#define STR(X)          STR2(X)
+#define FONTFILE(digit) STR(fonts/FONT/RESOLUTION/digit.h)
 
-#include FONT(0)
-#include FONT(1)
-#include FONT(2)
-#include FONT(3)
-#include FONT(4)
-#include FONT(5)
-#include FONT(6)
-#include FONT(7)
-#include FONT(8)
-#include FONT(9)
+#include FONTFILE(0)
+#include FONTFILE(1)
+#include FONTFILE(2)
+#include FONTFILE(3)
+#include FONTFILE(4)
+#include FONTFILE(5)
+#include FONTFILE(6)
+#include FONTFILE(7)
+#include FONTFILE(8)
+#include FONTFILE(9)
 
 const Point *const font[] =
   {pts_0, pts_1, pts_2, pts_3, pts_4, pts_5, pts_6, pts_7, pts_8, pts_9};

@@ -33,7 +33,7 @@ def convert(f: str, name: str) -> str:
         )
         pts_name = f"pts_{name.split('-')[0]}"
         return (
-            f'#include "../util.h"\n'
+            f'#include "../../../util.h"\n'
             f"const Point {pts_name}[] PROGMEM = {{\n    {pts}\n}};\n"
             f"const unsigned int {pts_name}_len = ARRAY_LEN({pts_name});"
         )

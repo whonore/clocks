@@ -1,13 +1,15 @@
 FONTDIR := fonts
-FONTS := $(addprefix $(FONTDIR)/,$(notdir $(patsubst %.png,%.h,$(wildcard $(FONTDIR)/src/*.png))))
+FONTS := $(shell find $(FONTDIR)/src -name '*.png')
+HFONTS := $(subst src/,,$(patsubst %.png,%.h,$(FONTS)))
 
 .PHONY: all clean
 .SECONDARY: $(FONTS)
 
-all: $(FONTS)
+all: $(HFONTS)
 
 $(FONTDIR)/%.h: $(FONTDIR)/src/%.png png2points/png2points.py
+	@mkdir -p "$(@D)"
 	python3 png2points/png2points.py $< > $@
 
 clean:
-	rm -f $(FONTS)
+	@rm -fv $(HFONTS)

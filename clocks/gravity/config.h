@@ -15,6 +15,11 @@
 #  error "Must define HOUR_ZOFF in local.h."
 #endif
 
+// The name of the digit font.
+#ifndef FONT
+#  define FONT tailed
+#endif
+
 // The resolution of the digit font in pixels.
 #ifndef RESOLUTION
 #  define RESOLUTION 16
