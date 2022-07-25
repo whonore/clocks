@@ -15,9 +15,15 @@ typedef byte pin_t;
 #define HOUR_MAX (HOUR24 ? 24 : 12)
 
 // 16-bit Colors
-const uint16_t BLACK = 0x0000;
-const uint16_t WHITE = 0xFFFF;
-const uint16_t YELLOW = 0xFFE0;
+constexpr inline uint16_t rgb565(uint32_t rgb888) {
+    return (((rgb888 & 0xF80000) >> 8)     // r5
+            | ((rgb888 & 0x00FC00) >> 5)   // g6
+            | ((rgb888 & 0x0000F8) >> 3)); // b5
+}
+
+const uint16_t BLACK = rgb565(0x000000);
+const uint16_t WHITE = rgb565(0xFFFFFF);
+const uint16_t YELLOW = rgb565(0xFFFF00);
 
 // Debug printing
 #if DEBUG
