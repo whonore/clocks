@@ -30,6 +30,10 @@ class DS3231 {
 
     void begin() {}
 
+    void setTime(uint8_t UNUSED(hour),
+                 uint8_t UNUSED(min),
+                 uint8_t UNUSED(sec)) {}
+
     Time getTime() {
         struct timespec ts;
         clock_gettime(CLOCK_REALTIME, &ts);
