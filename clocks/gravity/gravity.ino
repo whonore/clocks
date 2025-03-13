@@ -6,6 +6,7 @@
 #include <TimerInterrupt.h>
 
 #include "clock.h"
+#include "dst.h"
 #include "font.h"
 
 // clang-format off
@@ -48,8 +49,11 @@ void setup(void) {
 
 void loop(void) {
     Time time = rtc.getTime();
+
+    uint8_t dst_off = is_dst(time.date, time.mon, time.year) ? 1 : 0;
+
     set_time(&hand_min, time.min);
-    set_time(&hand_hour, time.hour);
+    set_time(&hand_hour, time.hour + dst_off);
 #if DISPLAY_SEC
     if (last_sec == -1) {
         for (uint8_t sec = 0; sec < time.sec; sec++) {
